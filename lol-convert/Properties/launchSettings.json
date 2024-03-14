@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "lol-convert": {
+      "commandName": "Project",
+      "commandLineArgs": "convert-league -f \"C:\\Riot Games\\League of Legends\\Game\\DATA\\FINAL\" -h \"X:\\lol\\hashes.game.txt\" -o \"X:\\lol\\lol-convert-test\""
+    }
+  }
+}

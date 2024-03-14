@@ -19,3 +19,16 @@ public class ConvertChampionOptions
     [Option('o', "out", Required = true, HelpText = "Path to the output file")]
     public string OutputPath { get; set; }
 }
+
+[Verb("convert-league", HelpText = "Convert a league installation into a portable JSON format")]
+public class ConvertLeagueOptions
+{
+    [Option('f', "final", Required = true, HelpText = "Path to the FINAL assets folder")]
+    public string FinalPath { get; set; }
+
+    [Option('h', "hashtable", Required = true, HelpText = "Path to the wad hasthable file to use")]
+    public string HashtablePath { get; set; }
+
+    [Option('o', "out", Required = true, HelpText = "Path to the output directory")]
+    public string OutputPath { get; set; }
+}
