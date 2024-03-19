@@ -19,9 +19,12 @@ internal class Program
 
     static int RunConvertLeague(ConvertLeagueOptions options)
     {
-        LeagueConverter converter = new(WadHashtable.FromFile(options.HashtablePath));
+        LeagueConverter converter =
+            new("x:/lolconvert-test", WadHashtable.FromFile(options.HashtablePath));
 
-        converter.CreateLeaguePackage(options.FinalPath, "");
+        var leaguePackage = converter.CreateLeaguePackage(options.FinalPath);
+
+        
 
         return 0;
     }

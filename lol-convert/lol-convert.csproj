@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="LeagueToolkit" Version="4.0.0-beta.31" />
+    <PackageReference Include="LeagueToolkit.IO.Extensions" Version="4.0.0-beta.31" />
     <PackageReference Include="LeagueToolkit.Meta.Classes" Version="4.0.0-beta.31" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
