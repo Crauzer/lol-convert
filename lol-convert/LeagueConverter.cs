@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.HighPerformance;
@@ -23,65 +25,136 @@ namespace lol_convert;
 
 public sealed class LeagueConverter
 {
-    private const string CHAMPIONS_PATH = "/Champions";
-
     public string OutputPath { get; private set; }
+    public LeagueConverterOptions Options { get; private set; }
 
     private readonly WadHashtable _hashtable;
     private readonly MetaEnvironment _metaEnvironment;
 
-    public LeagueConverter(string outputPath, WadHashtable hashtable)
+    public LeagueConverter(
+        string outputPath,
+        WadHashtable hashtable,
+        LeagueConverterOptions options
+    )
     {
         this.OutputPath = outputPath;
         this._hashtable = hashtable;
         this._metaEnvironment = MetaEnvironment.Create(
             Assembly.Load("LeagueToolkit.Meta.Classes").ExportedTypes.Where(x => x.IsClass)
         );
+        this.Options = options;
     }
 
     public LeaguePackage CreateLeaguePackage(string finalPath)
     {
         var championPackages = CreateChampionPackages(finalPath);
+        List<string> championPackagePaths = this.Options.ConvertChampions switch
+        {
+            true => SaveChampionPackages(championPackages),
+            false => []
+        };
 
-        return new() {  };
+        return new() { ChampionPackagePaths = championPackagePaths };
+    }
+
+    public List<string> SaveChampionPackages(List<ChampionPackage> championPackages)
+    {
+        List<string> championPackagePaths = new(championPackages.Count);
+        foreach (var championPackage in championPackages)
+        {
+            var championPackagePath = SaveChampionPackage(championPackage);
+            championPackagePaths.Add(championPackagePath);
+        }
+
+        return championPackagePaths;
+    }
+
+    public string SaveChampionPackage(ChampionPackage championPackage)
+    {
+        var championName = championPackage.Name.ToLower();
+        var championPackageDirectory = Path.Join(
+            this.OutputPath,
+            $"data/characters/{championName}"
+        );
+        var championPackagePath = Path.Join(championPackageDirectory, $"{championName}.json");
+
+        Directory.CreateDirectory(championPackageDirectory);
+        using var championPackageStream = File.Create(championPackagePath);
+        JsonSerializer.Serialize(
+            championPackageStream,
+            championPackage,
+            options: new()
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+            }
+        );
+
+        return championPackagePath;
     }
 
     public List<ChampionPackage> CreateChampionPackages(string finalPath)
     {
-        var championWadPaths = Directory
-            .EnumerateFiles(Path.Join(finalPath, CHAMPIONS_PATH))
-            .Where(path => Regex.IsMatch(Path.GetFileName(path), $@"^[\w]+\.wad\.client"))
-            .ToList();
-
+        var championWadPaths = ConvertUtils.GlobChampionWads(finalPath).ToList();
         List<ChampionPackage> championPackages = new(championWadPaths.Count);
         foreach (string championWadPath in championWadPaths)
         {
             var championWadName = Path.GetFileName(championWadPath);
             var championName = championWadName.ToLower().Remove(championWadName.IndexOf('.'));
-            WadFile wad = new(File.OpenRead(championWadPath));
 
-            var championPackage = CreateChampionPackage(championName, wad);
+            WadFile wad = new(File.OpenRead(championWadPath));
+            var chunkPaths = wad
+                .Chunks.Keys.Select(x => this._hashtable.Resolve(x).ToLower())
+                .ToList();
+
+            var championPackage = CreateChampionPackage(championName, wad, chunkPaths);
             championPackages.Add(championPackage);
         }
 
         return championPackages;
     }
 
-    private ChampionPackage CreateChampionPackage(string championName, WadFile wad)
+    private ChampionPackage CreateChampionPackage(
+        string championName,
+        WadFile wad,
+        List<string> chunkPaths
+    )
     {
-        string skinPrefixPath = $"data/characters/{championName}/skins/";
+        var skins = CreateChampionSkins(championName, wad, chunkPaths);
 
-        var skinBinPaths = wad
-            .Chunks.Keys.Select(x => this._hashtable.Resolve(x).ToLower())
-            .Where(chunkPath =>
-                chunkPath.StartsWith(skinPrefixPath, StringComparison.OrdinalIgnoreCase)
-            )
-            .ToList();
+        return new() { Name = championName, Skins = skins };
+    }
 
+    private List<ChampionSkin> CreateChampionSkins(
+        string championName,
+        WadFile wad,
+        List<string> chunkPaths
+    )
+    {
+        var skinBinPaths = ConvertUtils.GlobChampionSkinBinPaths(championName, chunkPaths).ToList();
         List<ChampionSkin> skins = new(skinBinPaths.Count);
         foreach (string skinBinPath in skinBinPaths)
         {
             string skinName = Path.GetFileNameWithoutExtension(skinBinPath);
+            if (skinName == "root")
+            {
+                Log.Verbose(
+                    "Skipping root champion skin package (championName: {championName})",
+                    championName,
+                    skinName
+                );
+                continue;
+            }
+
+            if (this.Options.ConvertChampionSkins is false && skinName != "skin0")
+            {
+                Log.Verbose(
+                    "Skipping champion skin package (championName: {championName}, skinName: {skinName})",
+                    championName,
+                    skinName
+                );
+                continue;
+            }
 
             try
             {
@@ -104,7 +177,7 @@ public sealed class LeagueConverter
             }
         }
 
-        return new() { Name = championName, Skins = skins };
+        return skins;
     }
 
     private ChampionSkin CreateChampionSkin(
@@ -165,35 +238,44 @@ public sealed class LeagueConverter
         WadFile wad
     )
     {
-        return wad
+        var animationPaths = wad
             .Chunks.Keys.Select(x => this._hashtable.Resolve(x).ToLower())
             .Where(chunkPath =>
                 chunkPath.StartsWith(
                     $"assets/characters/{championName}/skins/{skinName}/animations/",
                     StringComparison.OrdinalIgnoreCase
                 )
-            )
-            .Select(animationPath =>
-            {
-                IAnimationAsset animationAsset = null;
-                try
-                {
-                    animationAsset = AnimationAsset.Load(
-                        wad.LoadChunkDecompressed(animationPath).AsStream()
-                    );
-                }
-                catch (Exception e)
-                {
-                    Log.Error(
-                        e,
-                        "Failed to load animation asset (animationPath: {animationPath})",
-                        animationPath
-                    );
-                }
+            );
 
-                return (Path.GetFileNameWithoutExtension(animationPath), animationAsset);
-            })
-            .Where(x => x.Item2 is not null)
-            .ToList();
+        List<(string, IAnimationAsset)> animations = new();
+        foreach (var animationPath in animationPaths)
+        {
+            IAnimationAsset animationAsset = null;
+            try
+            {
+                animationAsset = AnimationAsset.Load(
+                    wad.LoadChunkDecompressed(animationPath).AsStream()
+                );
+            }
+            catch (Exception e)
+            {
+                Log.Error(
+                    e,
+                    "Failed to load animation asset (animationPath: {animationPath})",
+                    animationPath
+                );
+                continue;
+            }
+
+            animations.Add((Path.GetFileNameWithoutExtension(animationPath), animationAsset));
+        }
+
+        return animations;
     }
+}
+
+public sealed class LeagueConverterOptions
+{
+    public bool ConvertChampions { get; set; } = true;
+    public bool ConvertChampionSkins { get; set; } = true;
 }

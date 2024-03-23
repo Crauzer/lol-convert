@@ -31,4 +31,10 @@ public class ConvertLeagueOptions
 
     [Option('o', "out", Required = true, HelpText = "Path to the output directory")]
     public string OutputPath { get; set; }
+
+    [Option("convert-champions", Default = true, HelpText = "Convert champions")]
+    public bool? ConvertChampions { get; set; }
+
+    [Option("convert-champion-skins", Default = true, HelpText = "Convert champion skins")]
+    public bool? ConvertChampionSkins { get; set; }
 }
