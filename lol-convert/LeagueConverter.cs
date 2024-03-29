@@ -63,7 +63,7 @@ public sealed class LeagueConverter
         foreach (var championPackage in championPackages)
         {
             var championPackagePath = SaveChampionPackage(championPackage);
-            championPackagePaths.Add(championPackagePath);
+            championPackagePaths.Add(Path.GetRelativePath(this.OutputPath, championPackagePath));
         }
 
         return championPackagePaths;
@@ -74,7 +74,9 @@ public sealed class LeagueConverter
         var championName = championPackage.Name.ToLower();
         var championPackageDirectory = Path.Join(
             this.OutputPath,
-            $"data/characters/{championName}"
+            "data",
+            "characters",
+            championName
         );
         var championPackagePath = Path.Join(championPackageDirectory, $"{championName}.json");
 
