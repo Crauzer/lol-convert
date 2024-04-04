@@ -233,6 +233,11 @@ public sealed class LeagueConverter
 
         return skin;
     }
+    
+    private void CreateChampionSkinMaterials()
+    {
+
+    }
 
     private List<(string, IAnimationAsset)> LoadAnimations(
         string championName,
@@ -249,10 +254,10 @@ public sealed class LeagueConverter
                 )
             );
 
-        List<(string, IAnimationAsset)> animations = new();
+        List<(string, IAnimationAsset)> animations = [];
         foreach (var animationPath in animationPaths)
         {
-            IAnimationAsset animationAsset = null;
+            IAnimationAsset? animationAsset = null;
             try
             {
                 animationAsset = AnimationAsset.Load(
