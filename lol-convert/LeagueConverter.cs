@@ -72,12 +72,7 @@ public sealed class LeagueConverter
     public string SaveChampionPackage(ChampionPackage championPackage)
     {
         var championName = championPackage.Name.ToLower();
-        var championPackageDirectory = Path.Join(
-            this.OutputPath,
-            "data",
-            "characters",
-            championName
-        );
+        var championPackageDirectory = CreateChampionPackageDirectoryPath(championName);
         var championPackagePath = Path.Join(championPackageDirectory, $"{championName}.json");
 
         Directory.CreateDirectory(championPackageDirectory);
@@ -93,6 +88,32 @@ public sealed class LeagueConverter
         );
 
         return championPackagePath;
+    }
+
+    private void SaveChampionSkinPackage(string championName, ChampionSkin skin)
+    {
+        Log.Information(
+            "Saving champion skin package (championName: {championName}, skinName: {skinName})",
+            championName,
+            skin.Name
+        );
+
+        var championPackageDirectory = CreateChampionPackageDirectoryPath(championName);
+        var skinDirectory = Path.Join(championPackageDirectory, "skins", skin.Name);
+        var skinPackagePath = Path.Join(skinDirectory, $"{skin.Name}.json");
+
+        Directory.CreateDirectory(skinDirectory);
+        using var skinStream = File.Create(skinPackagePath);
+        JsonSerializer.Serialize(
+            skinStream,
+            skin,
+            options: new()
+            {
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                IncludeFields = true
+            }
+        );
     }
 
     public List<ChampionPackage> CreateChampionPackages(string finalPath)
@@ -123,8 +144,24 @@ public sealed class LeagueConverter
     )
     {
         var skins = CreateChampionSkins(championName, wad, chunkPaths);
+        foreach (var skin in skins)
+        {
+            try
+            {
+                SaveChampionSkinPackage(championName, skin);
+            }
+            catch (Exception e)
+            {
+                Log.Error(
+                    e,
+                    "Failed to save champion skin package (championName: {championName}, skinName: {skinName})",
+                    championName,
+                    skin.Name
+                );
+            }
+        }
 
-        return new() { Name = championName, Skins = skins };
+        return new() { Name = championName, SkinNames = skins.Select(x => x.Name).ToList() };
     }
 
     private List<ChampionSkin> CreateChampionSkins(
@@ -194,12 +231,16 @@ public sealed class LeagueConverter
             $"assets/characters/{championName}/skins/{skinName}/{championName}.glb";
         string absoluteMeshAssetPath = Path.Join(this.OutputPath, meshAssetPath);
 
+        var staticMaterials = CreateChampionSkinMaterials(bin, wad);
+
         ChampionSkin skin =
             new()
             {
+                Name = skinName,
                 DisplayName = "TODO",
                 SkinMeshPath = meshAssetPath,
-                SkinScale = 1.0f
+                SkinScale = 1.0f,
+                Materials = staticMaterials
             };
 
         Directory.CreateDirectory(Path.GetDirectoryName(absoluteMeshAssetPath));
@@ -233,10 +274,38 @@ public sealed class LeagueConverter
 
         return skin;
     }
-    
-    private void CreateChampionSkinMaterials()
-    {
 
+    private List<StaticMaterialPackage> CreateChampionSkinMaterials(BinTree binTree, WadFile wad)
+    {
+        List<StaticMaterialPackage> materialPackages = [];
+
+        var staticMaterialObjects = binTree.Objects.Values.Where(binObject =>
+            binObject.ClassHash == Fnv1a.HashLower(nameof(StaticMaterialDef))
+        );
+
+        foreach (var staticMaterialObject in staticMaterialObjects)
+        {
+            StaticMaterialDef? staticMaterialDef = null;
+            try
+            {
+                staticMaterialDef = MetaSerializer.Deserialize<StaticMaterialDef>(
+                    this._metaEnvironment,
+                    staticMaterialObject
+                );
+            }
+            catch (Exception ex)
+            {
+                Log.Error(
+                    ex,
+                    "Failed to deserialize static material object (objectHash: {objectHash})",
+                    staticMaterialObject.PathHash
+                );
+            }
+
+            materialPackages.Add(new(staticMaterialDef));
+        }
+
+        return materialPackages;
     }
 
     private List<(string, IAnimationAsset)> LoadAnimations(
@@ -278,6 +347,11 @@ public sealed class LeagueConverter
         }
 
         return animations;
+    }
+
+    private string CreateChampionPackageDirectoryPath(string championName)
+    {
+        return Path.Join(this.OutputPath, "data", "characters", championName);
     }
 }
 
