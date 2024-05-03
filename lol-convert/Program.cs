@@ -21,14 +21,11 @@ internal class Program
 
     static int RunConvertLeague(ConvertLeagueOptions options)
     {
-        if (Directory.Exists(options.OutputPath))
-        {
-            Log.Information(
-                "Clearing output directory (directory: {outputDirectory})",
-                options.OutputPath
-            );
-            Directory.Delete(options.OutputPath, true);
-        }
+        Log.Information(
+            "Clearing output directory (directory: {outputDirectory})",
+            options.OutputPath
+        );
+        FsUtils.ClearDirectory(options.OutputPath);
 
         LeagueConverter converter =
             new(
