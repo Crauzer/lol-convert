@@ -10,9 +10,13 @@ namespace lol_convert;
 public sealed partial class ConvertUtils
 {
     private const string CHAMPIONS_PATH = "/Champions";
+    private const string MAPS_PATH = "/Maps/Shipping";
 
     [GeneratedRegex(@"^[\w]+\.wad\.client")]
     private static partial Regex WadClientRegex();
+
+    [GeneratedRegex(@"^Map[\d]+\.wad\.client")]
+    private static partial Regex MapWadClientRegex();
 
     public static IEnumerable<string> GlobChampionWads(string finalPath) =>
         Directory
@@ -29,4 +33,9 @@ public sealed partial class ConvertUtils
                 StringComparison.OrdinalIgnoreCase
             )
         );
+
+    public static IEnumerable<string> GlobMapWads(string finalPath) =>
+        Directory
+            .EnumerateFiles(Path.Join(finalPath, MAPS_PATH))
+            .Where(path => MapWadClientRegex().IsMatch(Path.GetFileName(path)));
 }
