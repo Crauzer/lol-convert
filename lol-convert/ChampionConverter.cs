@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.HighPerformance;
+﻿using System.Text.Json;
+using CommunityToolkit.HighPerformance;
 using LeagueToolkit.Core.Animation;
 using LeagueToolkit.Core.Mesh;
 using LeagueToolkit.Core.Meta;
@@ -8,7 +9,6 @@ using LeagueToolkit.IO.SimpleSkinFile;
 using LeagueToolkit.Meta;
 using LeagueToolkit.Meta.Classes;
 using Serilog;
-using System.Text.Json;
 using Skeleton = LeagueToolkit.Core.Animation.RigResource;
 
 namespace lol_convert;
