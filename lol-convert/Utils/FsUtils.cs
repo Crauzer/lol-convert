@@ -1,4 +1,4 @@
-﻿namespace lol_convert;
+﻿namespace lol_convert.Utils;
 
 internal static class FsUtils
 {
@@ -16,5 +16,11 @@ internal static class FsUtils
         {
             Directory.Delete(dir, true);
         }
+    }
+
+    public static string FileNameWithoutMultiExtension(string path)
+    {
+        path = Path.GetFileNameWithoutExtension(path);
+        return path.Remove(path.IndexOf('.'));
     }
 }

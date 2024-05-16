@@ -8,6 +8,7 @@ using LeagueToolkit.Hashing;
 using LeagueToolkit.IO.SimpleSkinFile;
 using LeagueToolkit.Meta;
 using LeagueToolkit.Meta.Classes;
+using lol_convert.Utils;
 using Serilog;
 using Skeleton = LeagueToolkit.Core.Animation.RigResource;
 
@@ -94,16 +95,7 @@ internal class ChampionConverter
 
         Directory.CreateDirectory(skinDirectory);
         using var skinStream = File.Create(skinPackagePath);
-        JsonSerializer.Serialize(
-            skinStream,
-            skin,
-            options: new()
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                IncludeFields = true
-            }
-        );
+        JsonSerializer.Serialize(skinStream, skin, JsonUtils.DefaultOptions);
     }
 
     public string SaveChampionPackage(ChampionPackage championPackage)
@@ -114,15 +106,7 @@ internal class ChampionConverter
 
         Directory.CreateDirectory(championPackageDirectory);
         using var championPackageStream = File.Create(championPackagePath);
-        JsonSerializer.Serialize(
-            championPackageStream,
-            championPackage,
-            options: new()
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-            }
-        );
+        JsonSerializer.Serialize(championPackageStream, championPackage, JsonUtils.DefaultOptions);
 
         return championPackagePath;
     }
@@ -238,7 +222,7 @@ internal class ChampionConverter
 
         foreach (var staticMaterialObject in staticMaterialObjects)
         {
-            StaticMaterialDef? staticMaterialDef = null;
+            StaticMaterialDef staticMaterialDef = null;
             try
             {
                 staticMaterialDef = MetaSerializer.Deserialize<StaticMaterialDef>(
@@ -279,7 +263,7 @@ internal class ChampionConverter
         List<(string, IAnimationAsset)> animations = [];
         foreach (var animationPath in animationPaths)
         {
-            IAnimationAsset? animationAsset = null;
+            IAnimationAsset animationAsset = null;
             try
             {
                 animationAsset = AnimationAsset.Load(

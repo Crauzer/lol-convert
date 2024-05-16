@@ -14,8 +14,14 @@ public class ConvertLeagueOptions
     [Option('f', "final", Required = true, HelpText = "Path to the FINAL assets folder")]
     public string FinalPath { get; set; }
 
-    [Option('h', "hashtable", Required = true, HelpText = "Path to the wad hasthable file to use")]
-    public string HashtablePath { get; set; }
+    [Option("wad-hashtable", Required = true, HelpText = "Path to the wad hasthable file to use")]
+    public string WadHashtablePath { get; set; }
+
+    [Option("bin-hashes", Required = true, HelpText = "Path to the bin hashes file to use")]
+    public string BinHashesPath { get; set; }
+
+    [Option("bin-objects", Required = true, HelpText = "Path to the bin object hashes file to use")]
+    public string BinObjectHashesPath { get; set; }
 
     [Option('o', "out", Required = true, HelpText = "Path to the output directory")]
     public string OutputPath { get; set; }

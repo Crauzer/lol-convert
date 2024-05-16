@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.HighPerformance;
 using LeagueToolkit.Core.Environment;
@@ -11,6 +12,8 @@ using LeagueToolkit.Hashing;
 using LeagueToolkit.Meta;
 using LeagueToolkit.Meta.Classes;
 using lol_convert.Packages;
+using lol_convert.Services;
+using lol_convert.Utils;
 using Serilog;
 using Meta = LeagueToolkit.Meta.Classes;
 
@@ -37,17 +40,27 @@ internal class MapConverter
     {
         Log.Information("Creating map packages...");
 
+        Directory.CreateDirectory(Path.Combine(this._outputPath, "maps"));
+
         var mapWadPaths = ConvertUtils.GlobMapWads(finalPath).ToArray();
         var mapPackages = new List<string>(mapWadPaths.Length);
-
         foreach (var mapWadPath in mapWadPaths)
         {
             using var wad = new WadFile(mapWadPath);
 
-            string mapName = Path.GetFileName(mapWadPath).ToLower();
+            string mapName = FsUtils.FileNameWithoutMultiExtension(mapWadPath).ToLower();
             var mapShippingBinTree = ResolveMapShippingBinTree(wad, mapName);
 
-            var mapPackage = CreateMapPackage(mapName, mapShippingBinTree, wad);
+            try
+            {
+                var mapPackage = CreateMapPackage(mapName, mapShippingBinTree, wad);
+                SaveMapPackage(mapPackage);
+                mapPackages.Add(mapPackage.Name);
+            }
+            catch (Exception exception)
+            {
+                Log.Error(exception, "Failed to create map package (mapName = {0})", mapName);
+            }
         }
 
         return mapPackages;
@@ -57,15 +70,21 @@ internal class MapConverter
     {
         Log.Information("Creating map package (mapName = {mapName})", mapName);
 
-        var mapBinObject = shippingBinTree.Objects[Fnv1a.HashLower(nameof(Meta.Map))];
+        Directory.CreateDirectory(Path.Combine(this._outputPath, "maps", mapName));
+        Directory.CreateDirectory(Path.Combine(this._outputPath, "maps", mapName, "skins"));
+
+        var mapBinObject = shippingBinTree
+            .Objects.FirstOrDefault(x => x.Value.ClassHash == Fnv1a.HashLower(nameof(Meta.Map)))
+            .Value;
         var mapDefinition = MetaSerializer.Deserialize<Meta.Map>(
             this._metaEnvironment,
             mapBinObject
         );
 
+        List<string> mapSkinNames = [];
         foreach (var mapSkinObjectLink in mapDefinition.MapSkins)
         {
-            var mapSkinObject = shippingBinTree.Objects[Fnv1a.HashLower(nameof(Meta.MapSkin))];
+            var mapSkinObject = shippingBinTree.Objects[mapSkinObjectLink];
             var mapSkinDefinition = MetaSerializer.Deserialize<Meta.MapSkin>(
                 this._metaEnvironment,
                 mapSkinObject
@@ -81,17 +100,44 @@ internal class MapConverter
                 continue;
             }
 
-            var mapSkinPackage = CreateMapSkinPackage(mapSkinDefinition, wad);
+            try
+            {
+                var mapSkinPackage = CreateMapSkinPackage(mapName, mapSkinDefinition, wad);
+                SaveMapSkinPackage(mapName, mapSkinPackage);
+                mapSkinNames.Add(mapSkinPackage.Name);
+            }
+            catch (Exception exception)
+            {
+                Log.Error(
+                    exception,
+                    "Failed to create map skin package (mapSkinName = {0})",
+                    mapSkinDefinition.Name
+                );
+            }
         }
 
-        return new() { };
+        return new() { Name = mapName.ToLower(), Skins = mapSkinNames };
     }
 
-    private MapSkinPackage CreateMapSkinPackage(Meta.MapSkin mapSkinDefinition, WadFile wad)
+    private MapSkinPackage CreateMapSkinPackage(
+        string mapName,
+        Meta.MapSkin mapSkinDefinition,
+        WadFile wad
+    )
     {
         Log.Information(
             "Creating map skin package (mapSkinName = {mapSkinName})",
             mapSkinDefinition.Name
+        );
+
+        Directory.CreateDirectory(
+            Path.Combine(
+                this._outputPath,
+                "maps",
+                mapName,
+                "skins",
+                mapSkinDefinition.Name.ToLower()
+            )
         );
 
         var mapSkinGeometryPath = $"data/{mapSkinDefinition.MapContainerLink}";
@@ -106,18 +152,62 @@ internal class MapConverter
         using var environmentAsset = new EnvironmentAsset(environmentAssetStream);
         var materialsBin = new BinTree(materialsBinStream);
 
-        return new ();
+        var mapContainer = ResolveMapContainer(materialsBin, mapSkinDefinition.MapContainerLink);
+
+        var staticMaterialPackages = CollectStaticMaterialPackages(materialsBin)
+            .Select(x => new KeyValuePair<string, StaticMaterialPackage>(x.Name, x))
+            .ToDictionary();
+
+        var chunks = CollectChunks(materialsBin);
+
+        var container = new MapContainerPackage(mapContainer);
+
+        return new()
+        {
+            Name = mapSkinDefinition.Name.ToLower(),
+            Container = container,
+            StaticMaterials = staticMaterialPackages,
+            Chunks = chunks
+        };
     }
 
-    private List<StaticMaterialPackage> CollectStaticMaterialPackages(BinTree binTree)
+    private Meta.MapContainer ResolveMapContainer(BinTree shippingBinTree, string mapContainerLink)
+    {
+        var mapContainerObject = shippingBinTree.Objects[Fnv1a.HashLower(mapContainerLink)];
+        return MetaSerializer.Deserialize<Meta.MapContainer>(
+            MetaEnvironmentService.Environment,
+            mapContainerObject
+        );
+    }
+
+    private IEnumerable<StaticMaterialPackage> CollectStaticMaterialPackages(BinTree materialsBin)
     {
         var staticMaterialDefClassHash = Fnv1a.HashLower(nameof(Meta.StaticMaterialDef));
-        return binTree
+        return materialsBin
             .Objects.Values.Where(x => x.ClassHash == staticMaterialDefClassHash)
             .Select(x => new StaticMaterialPackage(
-                MetaSerializer.Deserialize<Meta.StaticMaterialDef>(this._metaEnvironment, x)
+                MetaSerializer.Deserialize<Meta.StaticMaterialDef>(
+                    MetaEnvironmentService.Environment,
+                    x
+                )
+            ));
+    }
+
+    private Dictionary<string, MapPlaceableContainerPackage> CollectChunks(BinTree materialsBin)
+    {
+        var mapPlaceableContainerClassHash = Fnv1a.HashLower(nameof(Meta.MapPlaceableContainer));
+        return materialsBin
+            .Objects.Values.Where(x => x.ClassHash == mapPlaceableContainerClassHash)
+            .Select(treeObject => new KeyValuePair<string, MapPlaceableContainerPackage>(
+                BinHashtableService.ResolveObjectHash(treeObject.PathHash),
+                new(
+                    MetaSerializer.Deserialize<Meta.MapPlaceableContainer>(
+                        MetaEnvironmentService.Environment,
+                        treeObject
+                    )
+                )
             ))
-            .ToList();
+            .ToDictionary();
     }
 
     private BinTree ResolveMapShippingBinTree(WadFile wad, string mapName)
@@ -126,5 +216,28 @@ internal class MapConverter
 
         using var mapShippingBinStream = wad.LoadChunkDecompressed(mapShippingPath).AsStream();
         return new(mapShippingBinStream);
+    }
+
+    private void SaveMapPackage(MapPackage map)
+    {
+        using var stream = File.Create(
+            Path.Combine(this._outputPath, "maps", map.Name, $"{map.Name}.json")
+        );
+        JsonSerializer.Serialize(stream, map, JsonUtils.DefaultOptions);
+    }
+
+    private void SaveMapSkinPackage(string mapName, MapSkinPackage mapSkin)
+    {
+        using var stream = File.Create(
+            Path.Combine(
+                this._outputPath,
+                "maps",
+                mapName,
+                "skins",
+                mapSkin.Name,
+                $"{mapSkin.Name}.json"
+            )
+        );
+        JsonSerializer.Serialize(stream, mapSkin, JsonUtils.DefaultOptions);
     }
 }

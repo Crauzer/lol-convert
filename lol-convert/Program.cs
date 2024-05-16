@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 using CommandLine;
+using lol_convert.Services;
+using lol_convert.Utils;
 using Serilog;
 
 namespace lol_convert;
@@ -21,6 +23,8 @@ internal class Program
 
     static int RunConvertLeague(ConvertLeagueOptions options)
     {
+        BinHashtableService.LoadBinHashes(options.BinHashesPath);
+
         Log.Information(
             "Clearing output directory (directory: {outputDirectory})",
             options.OutputPath
@@ -30,7 +34,7 @@ internal class Program
         LeagueConverter converter =
             new(
                 options.OutputPath,
-                WadHashtable.FromFile(options.HashtablePath),
+                WadHashtable.FromFile(options.WadHashtablePath),
                 new()
                 {
                     ConvertChampions = options.ConvertChampions ?? true,
