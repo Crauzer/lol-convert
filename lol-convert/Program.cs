@@ -24,6 +24,7 @@ internal class Program
     static int RunConvertLeague(ConvertLeagueOptions options)
     {
         BinHashtableService.LoadBinHashes(options.BinHashesPath);
+        BinHashtableService.LoadBinObjects(options.BinObjectHashesPath);
 
         Log.Information(
             "Clearing output directory (directory: {outputDirectory})",

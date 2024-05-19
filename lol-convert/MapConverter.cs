@@ -40,7 +40,7 @@ internal class MapConverter
     {
         Log.Information("Creating map packages...");
 
-        Directory.CreateDirectory(Path.Combine(this._outputPath, "maps"));
+        Directory.CreateDirectory(Path.Combine(this._outputPath, "data", "maps"));
 
         var mapWadPaths = ConvertUtils.GlobMapWads(finalPath).ToArray();
         var mapPackages = new List<string>(mapWadPaths.Length);
@@ -70,8 +70,8 @@ internal class MapConverter
     {
         Log.Information("Creating map package (mapName = {mapName})", mapName);
 
-        Directory.CreateDirectory(Path.Combine(this._outputPath, "maps", mapName));
-        Directory.CreateDirectory(Path.Combine(this._outputPath, "maps", mapName, "skins"));
+        Directory.CreateDirectory(Path.Combine(this._outputPath, "data", "maps", mapName));
+        Directory.CreateDirectory(Path.Combine(this._outputPath, "data", "maps", mapName, "skins"));
 
         var mapBinObject = shippingBinTree
             .Objects.FirstOrDefault(x => x.Value.ClassHash == Fnv1a.HashLower(nameof(Meta.Map)))
@@ -133,6 +133,7 @@ internal class MapConverter
         Directory.CreateDirectory(
             Path.Combine(
                 this._outputPath,
+                "data",
                 "maps",
                 mapName,
                 "skins",
@@ -221,7 +222,7 @@ internal class MapConverter
     private void SaveMapPackage(MapPackage map)
     {
         using var stream = File.Create(
-            Path.Combine(this._outputPath, "maps", map.Name, $"{map.Name}.json")
+            Path.Combine(this._outputPath, "data", "maps", map.Name, $"{map.Name}.json")
         );
         JsonSerializer.Serialize(stream, map, JsonUtils.DefaultOptions);
     }
@@ -231,6 +232,7 @@ internal class MapConverter
         using var stream = File.Create(
             Path.Combine(
                 this._outputPath,
+                "data",
                 "maps",
                 mapName,
                 "skins",
