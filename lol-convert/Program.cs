@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 using CommandLine;
+using lol_convert.Converters;
 using lol_convert.Services;
 using lol_convert.Utils;
+using lol_convert.Wad;
 using Serilog;
 
 namespace lol_convert;

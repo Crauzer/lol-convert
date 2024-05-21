@@ -14,10 +14,11 @@ using LeagueToolkit.Meta.Classes;
 using lol_convert.Packages;
 using lol_convert.Services;
 using lol_convert.Utils;
+using lol_convert.Wad;
 using Serilog;
 using Meta = LeagueToolkit.Meta.Classes;
 
-namespace lol_convert;
+namespace lol_convert.Converters;
 
 internal class MapConverter
 {
@@ -31,16 +32,16 @@ internal class MapConverter
         string outputPath
     )
     {
-        this._wadHashtable = wadHashtable;
-        this._metaEnvironment = metaEnvironment;
-        this._outputPath = outputPath;
+        _wadHashtable = wadHashtable;
+        _metaEnvironment = metaEnvironment;
+        _outputPath = outputPath;
     }
 
     public List<string> CreateMapPackages(string finalPath)
     {
         Log.Information("Creating map packages...");
 
-        Directory.CreateDirectory(Path.Combine(this._outputPath, "data", "maps"));
+        Directory.CreateDirectory(Path.Combine(_outputPath, "data", "maps"));
 
         var mapWadPaths = ConvertUtils.GlobMapWads(finalPath).ToArray();
         var mapPackages = new List<string>(mapWadPaths.Length);
@@ -70,14 +71,14 @@ internal class MapConverter
     {
         Log.Information("Creating map package (mapName = {mapName})", mapName);
 
-        Directory.CreateDirectory(Path.Combine(this._outputPath, "data", "maps", mapName));
-        Directory.CreateDirectory(Path.Combine(this._outputPath, "data", "maps", mapName, "skins"));
+        Directory.CreateDirectory(Path.Combine(_outputPath, "data", "maps", mapName));
+        Directory.CreateDirectory(Path.Combine(_outputPath, "data", "maps", mapName, "skins"));
 
         var mapBinObject = shippingBinTree
-            .Objects.FirstOrDefault(x => x.Value.ClassHash == Fnv1a.HashLower(nameof(Meta.Map)))
+            .Objects.FirstOrDefault(x => x.Value.ClassHash == Fnv1a.HashLower(nameof(Map)))
             .Value;
-        var mapDefinition = MetaSerializer.Deserialize<Meta.Map>(
-            this._metaEnvironment,
+        var mapDefinition = MetaSerializer.Deserialize<Map>(
+            _metaEnvironment,
             mapBinObject
         );
 
@@ -85,8 +86,8 @@ internal class MapConverter
         foreach (var mapSkinObjectLink in mapDefinition.MapSkins)
         {
             var mapSkinObject = shippingBinTree.Objects[mapSkinObjectLink];
-            var mapSkinDefinition = MetaSerializer.Deserialize<Meta.MapSkin>(
-                this._metaEnvironment,
+            var mapSkinDefinition = MetaSerializer.Deserialize<MapSkin>(
+                _metaEnvironment,
                 mapSkinObject
             );
 
@@ -121,7 +122,7 @@ internal class MapConverter
 
     private MapSkinPackage CreateMapSkinPackage(
         string mapName,
-        Meta.MapSkin mapSkinDefinition,
+        MapSkin mapSkinDefinition,
         WadFile wad
     )
     {
@@ -132,7 +133,7 @@ internal class MapConverter
 
         Directory.CreateDirectory(
             Path.Combine(
-                this._outputPath,
+                _outputPath,
                 "data",
                 "maps",
                 mapName,
@@ -172,10 +173,10 @@ internal class MapConverter
         };
     }
 
-    private Meta.MapContainer ResolveMapContainer(BinTree shippingBinTree, string mapContainerLink)
+    private MapContainer ResolveMapContainer(BinTree shippingBinTree, string mapContainerLink)
     {
         var mapContainerObject = shippingBinTree.Objects[Fnv1a.HashLower(mapContainerLink)];
-        return MetaSerializer.Deserialize<Meta.MapContainer>(
+        return MetaSerializer.Deserialize<MapContainer>(
             MetaEnvironmentService.Environment,
             mapContainerObject
         );
@@ -183,11 +184,11 @@ internal class MapConverter
 
     private IEnumerable<StaticMaterialPackage> CollectStaticMaterialPackages(BinTree materialsBin)
     {
-        var staticMaterialDefClassHash = Fnv1a.HashLower(nameof(Meta.StaticMaterialDef));
+        var staticMaterialDefClassHash = Fnv1a.HashLower(nameof(StaticMaterialDef));
         return materialsBin
             .Objects.Values.Where(x => x.ClassHash == staticMaterialDefClassHash)
             .Select(x => new StaticMaterialPackage(
-                MetaSerializer.Deserialize<Meta.StaticMaterialDef>(
+                MetaSerializer.Deserialize<StaticMaterialDef>(
                     MetaEnvironmentService.Environment,
                     x
                 )
@@ -196,13 +197,13 @@ internal class MapConverter
 
     private Dictionary<string, MapPlaceableContainerPackage> CollectChunks(BinTree materialsBin)
     {
-        var mapPlaceableContainerClassHash = Fnv1a.HashLower(nameof(Meta.MapPlaceableContainer));
+        var mapPlaceableContainerClassHash = Fnv1a.HashLower(nameof(MapPlaceableContainer));
         return materialsBin
             .Objects.Values.Where(x => x.ClassHash == mapPlaceableContainerClassHash)
             .Select(treeObject => new KeyValuePair<string, MapPlaceableContainerPackage>(
                 BinHashtableService.ResolveObjectHash(treeObject.PathHash),
                 new(
-                    MetaSerializer.Deserialize<Meta.MapPlaceableContainer>(
+                    MetaSerializer.Deserialize<MapPlaceableContainer>(
                         MetaEnvironmentService.Environment,
                         treeObject
                     )
@@ -222,7 +223,7 @@ internal class MapConverter
     private void SaveMapPackage(MapPackage map)
     {
         using var stream = File.Create(
-            Path.Combine(this._outputPath, "data", "maps", map.Name, $"{map.Name}.json")
+            Path.Combine(_outputPath, "data", "maps", map.Name, $"{map.Name}.json")
         );
         JsonSerializer.Serialize(stream, map, JsonUtils.DefaultOptions);
     }
@@ -231,7 +232,7 @@ internal class MapConverter
     {
         using var stream = File.Create(
             Path.Combine(
-                this._outputPath,
+                _outputPath,
                 "data",
                 "maps",
                 mapName,

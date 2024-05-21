@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace lol_convert;
+namespace lol_convert.Wad;
 
 public sealed class WadHashtable
 {
@@ -15,7 +15,7 @@ public sealed class WadHashtable
 
     public WadHashtable(Dictionary<ulong, string> hashtable)
     {
-        this._hashtable = hashtable;
+        _hashtable = hashtable;
     }
 
     public static WadHashtable FromFile(string path)
@@ -35,5 +35,5 @@ public sealed class WadHashtable
 
     public string ResolveChunk(WadChunk chunk) => Resolve(chunk.PathHash);
 
-    public string Resolve(ulong pathHash) => this._hashtable.GetValueOrDefault(pathHash, string.Format("0x{0:x8}", pathHash));
+    public string Resolve(ulong pathHash) => _hashtable.GetValueOrDefault(pathHash, string.Format("0x{0:x8}", pathHash));
 }

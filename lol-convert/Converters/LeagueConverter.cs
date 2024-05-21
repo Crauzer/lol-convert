@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
 using LeagueToolkit.Meta;
 using lol_convert.Packages;
+using lol_convert.Wad;
 
-namespace lol_convert;
+namespace lol_convert.Converters;
 
 public sealed class LeagueConverter
 {
@@ -21,23 +22,23 @@ public sealed class LeagueConverter
         LeagueConverterOptions options
     )
     {
-        this.OutputPath = outputPath;
-        this.Options = options;
+        OutputPath = outputPath;
+        Options = options;
 
-        this._hashtable = hashtable;
-        this._metaEnvironment = MetaEnvironment.Create(
+        _hashtable = hashtable;
+        _metaEnvironment = MetaEnvironment.Create(
             Assembly.Load("LeagueToolkit.Meta.Classes").ExportedTypes.Where(x => x.IsClass)
         );
 
-        this._championConverter = new(hashtable, _metaEnvironment, outputPath);
-        this._mapConverter = new(hashtable, _metaEnvironment, outputPath);
-    
+        _championConverter = new(hashtable, _metaEnvironment, outputPath);
+        _mapConverter = new(hashtable, _metaEnvironment, outputPath);
+
     }
 
     public LeaguePackage CreateLeaguePackage(string finalPath)
     {
-        var maps = this._mapConverter.CreateMapPackages(finalPath);
-        var championPackagePaths = this._championConverter.CreateChampionPackages(finalPath);
+        var maps = _mapConverter.CreateMapPackages(finalPath);
+        var championPackagePaths = _championConverter.CreateChampionPackages(finalPath);
 
         return new() { ChampionPackagePaths = championPackagePaths, Maps = maps };
     }

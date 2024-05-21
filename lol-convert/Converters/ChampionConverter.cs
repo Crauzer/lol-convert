@@ -8,11 +8,13 @@ using LeagueToolkit.Hashing;
 using LeagueToolkit.IO.SimpleSkinFile;
 using LeagueToolkit.Meta;
 using LeagueToolkit.Meta.Classes;
+using lol_convert.Packages;
 using lol_convert.Utils;
+using lol_convert.Wad;
 using Serilog;
 using Skeleton = LeagueToolkit.Core.Animation.RigResource;
 
-namespace lol_convert;
+namespace lol_convert.Converters;
 
 internal class ChampionConverter
 {
@@ -26,9 +28,9 @@ internal class ChampionConverter
         string outputPath
     )
     {
-        this._wadHashtable = wadHashtable;
-        this._metaEnvironment = metaEnvironment;
-        this._outputPath = outputPath;
+        _wadHashtable = wadHashtable;
+        _metaEnvironment = metaEnvironment;
+        _outputPath = outputPath;
     }
 
     public List<string> CreateChampionPackages(string finalPath)
@@ -42,13 +44,13 @@ internal class ChampionConverter
 
             WadFile wad = new(File.OpenRead(championWadPath));
             var chunkPaths = wad
-                .Chunks.Keys.Select(x => this._wadHashtable.Resolve(x).ToLower())
+                .Chunks.Keys.Select(x => _wadHashtable.Resolve(x).ToLower())
                 .ToList();
 
             var championPackage = CreateChampionPackage(championName, wad, chunkPaths);
             var championPackagePath = SaveChampionPackage(championPackage);
 
-            championPackagePaths.Add(Path.GetRelativePath(this._outputPath, championPackagePath));
+            championPackagePaths.Add(Path.GetRelativePath(_outputPath, championPackagePath));
         }
 
         return championPackagePaths;
@@ -166,7 +168,7 @@ internal class ChampionConverter
         string skinPropertiesObjectPath = $"characters/{championName}/skins/{skinName}";
         string meshAssetPath =
             $"assets/characters/{championName}/skins/{skinName}/{championName}_{skinName}.glb";
-        string absoluteMeshAssetPath = Path.Join(this._outputPath, meshAssetPath);
+        string absoluteMeshAssetPath = Path.Join(_outputPath, meshAssetPath);
 
         var staticMaterials = CreateChampionSkinMaterials(bin, wad);
 
@@ -184,7 +186,7 @@ internal class ChampionConverter
 
         var skinPropertiesObject = bin.Objects[Fnv1a.HashLower(skinPropertiesObjectPath)];
         var skinProperties = MetaSerializer.Deserialize<SkinCharacterDataProperties>(
-            this._metaEnvironment,
+            _metaEnvironment,
             skinPropertiesObject
         );
 
@@ -226,7 +228,7 @@ internal class ChampionConverter
             try
             {
                 staticMaterialDef = MetaSerializer.Deserialize<StaticMaterialDef>(
-                    this._metaEnvironment,
+                    _metaEnvironment,
                     staticMaterialObject
                 );
             }
@@ -252,7 +254,7 @@ internal class ChampionConverter
     )
     {
         var animationPaths = wad
-            .Chunks.Keys.Select(x => this._wadHashtable.Resolve(x).ToLower())
+            .Chunks.Keys.Select(x => _wadHashtable.Resolve(x).ToLower())
             .Where(chunkPath =>
                 chunkPath.StartsWith(
                     $"assets/characters/{championName}/skins/{skinName}/animations/",
@@ -288,6 +290,6 @@ internal class ChampionConverter
 
     private string CreateChampionPackageDirectoryPath(string championName)
     {
-        return Path.Join(this._outputPath, "data", "characters", championName);
+        return Path.Join(_outputPath, "data", "characters", championName);
     }
 }
