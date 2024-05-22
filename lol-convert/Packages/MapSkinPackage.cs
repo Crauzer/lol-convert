@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using LeagueToolkit.Core.Meta;
 using LeagueToolkit.Meta;
 using lol_convert.Services;
-using Meta = LeagueToolkit.Meta.Classes;
+using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Packages;
 
@@ -33,7 +33,7 @@ internal class MapContainerPackage
 
     public Dictionary<string, string> Chunks { get; set; } = [];
 
-    public MapContainerPackage(Meta.MapContainer mapContainer)
+    public MapContainerPackage(MetaClass.MapContainer mapContainer)
     {
         this.MapPath = mapContainer.MapPath;
         this.BoundsMin = mapContainer.BoundsMin;
@@ -56,7 +56,7 @@ internal class MapPlaceableContainerPackage
 {
     public Dictionary<string, MapPlaceableBase> Items;
 
-    public MapPlaceableContainerPackage(Meta.MapPlaceableContainer mapPlaceableContainer)
+    public MapPlaceableContainerPackage(MetaClass.MapPlaceableContainer mapPlaceableContainer)
     {
         this.Items =
             mapPlaceableContainer
@@ -64,8 +64,8 @@ internal class MapPlaceableContainerPackage
                     BinHashtableService.ResolveHash(x.Key),
                     x.Value switch
                     {
-                        Meta.MapParticle mapParticle => new MapParticlePackage(mapParticle),
-                        Meta.MapPlaceable mapPlaceable => new MapPlaceableBase(mapPlaceable),
+                        MetaClass.MapParticle mapParticle => new MapParticlePackage(mapParticle),
+                        MetaClass.MapPlaceable mapPlaceable => new MapPlaceableBase(mapPlaceable),
                         _ => null,
                     }
                 ))
@@ -74,14 +74,14 @@ internal class MapPlaceableContainerPackage
 }
 
 [JsonDerivedType(typeof(MapParticlePackage), typeDiscriminator: "map_particle")]
-internal class MapPlaceableBase(Meta.MapPlaceable mapPlaceable)
+internal class MapPlaceableBase(MetaClass.MapPlaceable mapPlaceable)
 {
     public string Name { get; set; } = mapPlaceable.Name;
     public byte VisibilityFlags { get; set; } = mapPlaceable.VisibilityFlags;
     public Matrix4x4 Transform { get; set; } = mapPlaceable.Transform;
 }
 
-internal class MapParticlePackage(Meta.MapParticle mapParticle) : MapPlaceableBase(mapParticle)
+internal class MapParticlePackage(MetaClass.MapParticle mapParticle) : MapPlaceableBase(mapParticle)
 {
     public Vector4 ColorModulate { get; set; } = mapParticle.ColorModulate;
     public bool EyeCandy { get; set; } = mapParticle.EyeCandy;

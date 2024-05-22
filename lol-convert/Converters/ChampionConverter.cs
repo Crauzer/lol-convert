@@ -8,10 +8,12 @@ using LeagueToolkit.Hashing;
 using LeagueToolkit.IO.SimpleSkinFile;
 using LeagueToolkit.Meta;
 using LeagueToolkit.Meta.Classes;
+using lol_convert.Meta;
 using lol_convert.Packages;
 using lol_convert.Utils;
 using lol_convert.Wad;
 using Serilog;
+using MetaClass = LeagueToolkit.Meta.Classes;
 using Skeleton = LeagueToolkit.Core.Animation.RigResource;
 
 namespace lol_convert.Converters;
@@ -168,9 +170,9 @@ internal class ChampionConverter
         string skinPropertiesObjectPath = $"characters/{championName}/skins/{skinName}";
         string meshAssetPath =
             $"assets/characters/{championName}/skins/{skinName}/{championName}_{skinName}.glb";
-        string absoluteMeshAssetPath = Path.Join(_outputPath, meshAssetPath);
 
-        var staticMaterials = CreateChampionSkinMaterials(bin, wad);
+        var binObjectContainer = BinObjectContainer.FromPropertyBin(bin, wad);
+        var staticMaterials = CreateChampionSkinMaterials(binObjectContainer.Objects.Values);
 
         ChampionSkin skin =
             new()
@@ -181,8 +183,6 @@ internal class ChampionConverter
                 SkinScale = 1.0f,
                 Materials = staticMaterials
             };
-
-        Directory.CreateDirectory(Path.GetDirectoryName(absoluteMeshAssetPath));
 
         var skinPropertiesObject = bin.Objects[Fnv1a.HashLower(skinPropertiesObjectPath)];
         var skinProperties = MetaSerializer.Deserialize<SkinCharacterDataProperties>(
@@ -200,25 +200,25 @@ internal class ChampionConverter
 
         skin.SkinScale = skinMeshProperties.SkinScale;
 
-        Skeleton rig = new(wad.LoadChunkDecompressed(skinMeshProperties.Skeleton).AsStream());
-        SkinnedMesh simpleSkin = SkinnedMesh.ReadFromSimpleSkin(
-            wad.LoadChunkDecompressed(skinMeshProperties.SimpleSkin).AsStream()
+        ProduceChampionSkinMesh(
+            championName,
+            skinName,
+            meshAssetPath,
+            skinProperties,
+            binObjectContainer,
+            wad
         );
-        var animations = LoadAnimations(championName, skinName, wad);
-
-        Log.Verbose("Saving glTf -> {meshAssetPath}", meshAssetPath);
-        simpleSkin
-            .ToGltf(rig, new List<(string, Stream)>(), animations)
-            .Save(absoluteMeshAssetPath);
 
         return skin;
     }
 
-    private List<StaticMaterialPackage> CreateChampionSkinMaterials(BinTree binTree, WadFile wad)
+    private List<StaticMaterialPackage> CreateChampionSkinMaterials(
+        IEnumerable<BinTreeObject> binObjects
+    )
     {
         List<StaticMaterialPackage> materialPackages = [];
 
-        var staticMaterialObjects = binTree.Objects.Values.Where(binObject =>
+        var staticMaterialObjects = binObjects.Where(binObject =>
             binObject.ClassHash == Fnv1a.HashLower(nameof(StaticMaterialDef))
         );
 
@@ -247,25 +247,78 @@ internal class ChampionConverter
         return materialPackages;
     }
 
-    private List<(string, IAnimationAsset)> LoadAnimations(
+    private void ProduceChampionSkinMesh(
         string championName,
         string skinName,
+        string meshAssetPath,
+        MetaClass.SkinCharacterDataProperties skinCharacterProperties,
+        BinObjectContainer binObjectContainer,
         WadFile wad
     )
     {
-        var animationPaths = wad
-            .Chunks.Keys.Select(x => _wadHashtable.Resolve(x).ToLower())
-            .Where(chunkPath =>
-                chunkPath.StartsWith(
-                    $"assets/characters/{championName}/skins/{skinName}/animations/",
-                    StringComparison.OrdinalIgnoreCase
-                )
-            );
+        string absoluteMeshAssetPath = Path.Join(this._outputPath, meshAssetPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(absoluteMeshAssetPath));
 
+        Skeleton rig =
+            new(
+                wad.LoadChunkDecompressed(skinCharacterProperties.SkinMeshProperties.Value.Skeleton)
+                    .AsStream()
+            );
+        SkinnedMesh simpleSkin = SkinnedMesh.ReadFromSimpleSkin(
+            wad.LoadChunkDecompressed(skinCharacterProperties.SkinMeshProperties.Value.SimpleSkin)
+                .AsStream()
+        );
+
+        var animationGraphData = ResolveAnimationGraphData(
+            championName,
+            skinName,
+            skinCharacterProperties,
+            binObjectContainer
+        );
+        var animationPaths = CollectAtomicClipResourcePaths(animationGraphData);
+        var animations = LoadAnimations(animationPaths, wad);
+
+        Log.Verbose("Saving glTf -> {meshAssetPath}", meshAssetPath);
+        simpleSkin.ToGltf(rig, new List<(string, Stream)>(), animations).Save(absoluteMeshAssetPath);
+    }
+
+    private AnimationGraphPackage CreateAnimationGraph(
+        string championName,
+        string skinName,
+        MetaClass.SkinCharacterDataProperties skinCharacterProperties,
+        BinObjectContainer binObjectContainer
+    )
+    {
+        if (
+            skinCharacterProperties.SkinAnimationProperties?.Value?.AnimationGraphData
+            is not MetaObjectLink animationGraphDataLink
+        )
+        {
+            Log.Warning(
+                "{championName} - {skinName} does not have an animation graph data link",
+                championName,
+                skinName
+            );
+            return new();
+        }
+
+        var animationGraph = MetaSerializer.Deserialize<MetaClass.AnimationGraphData>(
+            this._metaEnvironment,
+            binObjectContainer.Objects[animationGraphDataLink]
+        );
+
+        return new(animationGraph);
+    }
+
+    private static List<(string, IAnimationAsset)> LoadAnimations(
+        IEnumerable<string> animationPaths,
+        WadFile wad
+    )
+    {
         List<(string, IAnimationAsset)> animations = [];
         foreach (var animationPath in animationPaths)
         {
-            IAnimationAsset animationAsset = null;
+            IAnimationAsset animationAsset;
             try
             {
                 animationAsset = AnimationAsset.Load(
@@ -286,6 +339,46 @@ internal class ChampionConverter
         }
 
         return animations;
+    }
+
+    private MetaClass.AnimationGraphData ResolveAnimationGraphData(
+        string championName,
+        string skinName,
+        MetaClass.SkinCharacterDataProperties skinCharacterProperties,
+        BinObjectContainer binObjectContainer
+    )
+    {
+        if (
+            skinCharacterProperties.SkinAnimationProperties?.Value?.AnimationGraphData
+            is not MetaObjectLink animationGraphDataLink
+        )
+        {
+            return null;
+        }
+
+        return MetaSerializer.Deserialize<MetaClass.AnimationGraphData>(
+            this._metaEnvironment,
+            binObjectContainer.Objects[animationGraphDataLink]
+        );
+    }
+
+    private static List<string> CollectAtomicClipResourcePaths(
+        MetaClass.AnimationGraphData animationGraph
+    )
+    {
+        List<string> paths = [];
+
+        foreach (var clip in animationGraph.ClipDataMap.Values)
+        {
+            if (clip is not AtomicClipData atomicClip)
+            {
+                continue;
+            }
+
+            paths.Add(atomicClip.AnimationResourceData.Value.AnimationFilePath);
+        }
+
+        return paths;
     }
 
     private string CreateChampionPackageDirectoryPath(string championName)
