@@ -66,6 +66,7 @@ internal class MapPlaceableContainerPackage
                     {
                         MetaClass.MapParticle mapParticle => new MapParticlePackage(mapParticle),
                         MetaClass.MapLocator mapLocator => new MapLocatorPackage(mapLocator),
+                        MetaClass.MapAudio mapAudio => new MapAudioPackage(mapAudio),
                         MetaClass.MapPlaceable mapPlaceable => new MapPlaceableBase(mapPlaceable),
                         _ => null,
                     }
@@ -97,4 +98,13 @@ internal class MapParticlePackage(MetaClass.MapParticle mapParticle) : MapPlacea
     public uint System { get; set; } = mapParticle.System;
     public bool Transitional { get; set; } = mapParticle.Transitional;
     public uint VisibilityMode { get; set; } = mapParticle.VisibilityMode;
+}
+
+internal class MapAudioPackage(MetaClass.MapAudio mapAudio) : MapPlaceableBase(mapAudio)
+{
+    public uint AudioType { get; set; } = mapAudio.AudioType;
+    public string EventName { get; set; } = mapAudio.EventName;
+    public string m1364240033 { get; set; } = BinHashtableService.ResolveObjectHash(mapAudio.m1364240033);
+    public float m3743124039 { get; set; } = mapAudio.m3743124039;
+    public float StartTime { get; set; } = mapAudio.StartTime;
 }
