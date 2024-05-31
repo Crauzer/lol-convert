@@ -68,6 +68,7 @@ internal class MapPlaceableContainerPackage
                         MetaClass.MapParticle mapParticle => new MapParticlePackage(mapParticle),
                         MetaClass.MapLocator mapLocator => new MapLocatorPackage(mapLocator),
                         MetaClass.MapAudio mapAudio => new MapAudioPackage(mapAudio),
+                        MetaClass.GdsMapObject gdsMapObject => new GdsMapObjectPackage(gdsMapObject),
                         MetaClass.MapPlaceable mapPlaceable => new MapPlaceableBase(mapPlaceable),
                         _ => null,
                     }
@@ -159,3 +160,4 @@ internal class GdsMapObjectBannerInfoPackage(MetaClass.GDSMapObjectBannerInfo ba
     public string BannerData { get; set; } =
         BinHashtableService.ResolveObjectHash(bannerInfo.BannerData);
 }
+
