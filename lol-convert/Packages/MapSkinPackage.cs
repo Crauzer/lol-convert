@@ -65,6 +65,7 @@ internal class MapPlaceableContainerPackage
                     x.Value switch
                     {
                         MetaClass.MapParticle mapParticle => new MapParticlePackage(mapParticle),
+                        MetaClass.MapLocator mapLocator => new MapLocatorPackage(mapLocator),
                         MetaClass.MapPlaceable mapPlaceable => new MapPlaceableBase(mapPlaceable),
                         _ => null,
                     }
@@ -74,12 +75,15 @@ internal class MapPlaceableContainerPackage
 }
 
 [JsonDerivedType(typeof(MapParticlePackage), typeDiscriminator: "map_particle")]
+[JsonDerivedType(typeof(MapLocatorPackage), typeDiscriminator: "map_locator")]
 internal class MapPlaceableBase(MetaClass.MapPlaceable mapPlaceable)
 {
     public string Name { get; set; } = mapPlaceable.Name;
     public byte VisibilityFlags { get; set; } = mapPlaceable.VisibilityFlags;
     public Matrix4x4 Transform { get; set; } = mapPlaceable.Transform;
 }
+
+internal class MapLocatorPackage(MetaClass.MapLocator mapLocator) : MapPlaceableBase(mapLocator) { }
 
 internal class MapParticlePackage(MetaClass.MapParticle mapParticle) : MapPlaceableBase(mapParticle)
 {
