@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using LeagueToolkit.Core.Meta;
 using LeagueToolkit.Meta;
+using LeagueToolkit.Meta.Classes;
 using lol_convert.Services;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
@@ -77,6 +78,8 @@ internal class MapPlaceableContainerPackage
 
 [JsonDerivedType(typeof(MapParticlePackage), typeDiscriminator: "map_particle")]
 [JsonDerivedType(typeof(MapLocatorPackage), typeDiscriminator: "map_locator")]
+[JsonDerivedType(typeof(MapAudioPackage), typeDiscriminator: "map_audio")]
+[JsonDerivedType(typeof(GdsMapObjectPackage), typeDiscriminator: "gds_map_object")]
 internal class MapPlaceableBase(MetaClass.MapPlaceable mapPlaceable)
 {
     public string Name { get; set; } = mapPlaceable.Name;
@@ -104,7 +107,55 @@ internal class MapAudioPackage(MetaClass.MapAudio mapAudio) : MapPlaceableBase(m
 {
     public uint AudioType { get; set; } = mapAudio.AudioType;
     public string EventName { get; set; } = mapAudio.EventName;
-    public string m1364240033 { get; set; } = BinHashtableService.ResolveObjectHash(mapAudio.m1364240033);
+    public string m1364240033 { get; set; } =
+        BinHashtableService.ResolveObjectHash(mapAudio.m1364240033);
     public float m3743124039 { get; set; } = mapAudio.m3743124039;
     public float StartTime { get; set; } = mapAudio.StartTime;
+}
+
+internal class GdsMapObjectPackage(MetaClass.GdsMapObject gdsMapObject)
+    : MapPlaceableBase(gdsMapObject)
+{
+    public Vector3 BoxMin { get; set; } = gdsMapObject.BoxMin;
+    public Vector3 BoxMax { get; set; } = gdsMapObject.BoxMax;
+    public List<GdsMapObjectExtraInfoPackage> ExtraInfo { get; set; } =
+        gdsMapObject
+            .ExtraInfo.Select<MetaClass.GDSMapObjectExtraInfo, GdsMapObjectExtraInfoPackage>(x =>
+                x switch
+                {
+                    MetaClass.GDSMapObjectAnimationInfo gdsMapObjectAnimationInfo
+                        => new GdsMapObjectAnimationInfoPackage(gdsMapObjectAnimationInfo),
+                    MetaClass.GDSMapObjectBannerInfo bannerInfo
+                        => new GdsMapObjectBannerInfoPackage(bannerInfo),
+                    _ => null
+                }
+            )
+            .ToList();
+    public bool EyeCandy { get; set; } = gdsMapObject.EyeCandy;
+    public bool IgnoreCollisionOnPlacement { get; set; } = gdsMapObject.IgnoreCollisionOnPlacement;
+    public string m1364240033 { get; set; } =
+        BinHashtableService.ResolveObjectHash(gdsMapObject.m1364240033);
+    public uint MapObjectSkinId { get; set; } = gdsMapObject.MapObjectSkinID;
+    public byte Type { get; set; } = gdsMapObject.Type;
+}
+
+[JsonDerivedType(typeof(GdsMapObjectAnimationInfoPackage), typeDiscriminator: "animation_info")]
+[JsonDerivedType(typeof(GdsMapObjectBannerInfoPackage), typeDiscriminator: "banner_info")]
+internal class GdsMapObjectExtraInfoPackage { }
+
+internal class GdsMapObjectAnimationInfoPackage(
+    MetaClass.GDSMapObjectAnimationInfo gdsMapObjectAnimationInfo
+) : GdsMapObjectExtraInfoPackage
+{
+    public string DefaultAnimation { get; set; } = gdsMapObjectAnimationInfo.DefaultAnimation;
+    public bool DestroyOnCompletion { get; set; } = gdsMapObjectAnimationInfo.DestroyOnCompletion;
+    public float Duration { get; set; } = gdsMapObjectAnimationInfo.Duration;
+    public bool Looping { get; set; } = gdsMapObjectAnimationInfo.Looping;
+}
+
+internal class GdsMapObjectBannerInfoPackage(MetaClass.GDSMapObjectBannerInfo bannerInfo)
+    : GdsMapObjectExtraInfoPackage
+{
+    public string BannerData { get; set; } =
+        BinHashtableService.ResolveObjectHash(bannerInfo.BannerData);
 }
