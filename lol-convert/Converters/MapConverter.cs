@@ -77,10 +77,7 @@ internal class MapConverter
         var mapBinObject = shippingBinTree
             .Objects.FirstOrDefault(x => x.Value.ClassHash == Fnv1a.HashLower(nameof(Map)))
             .Value;
-        var mapDefinition = MetaSerializer.Deserialize<Map>(
-            _metaEnvironment,
-            mapBinObject
-        );
+        var mapDefinition = MetaSerializer.Deserialize<Map>(_metaEnvironment, mapBinObject);
 
         List<string> mapSkinNames = [];
         foreach (var mapSkinObjectLink in mapDefinition.MapSkins)
@@ -169,11 +166,15 @@ internal class MapConverter
             Name = mapSkinDefinition.Name.ToLower(),
             Container = container,
             StaticMaterials = staticMaterialPackages,
+            MeshVisibilityControllerResolver = CreateMeshVisibilityControllerResolver(environmentAsset),
             Chunks = chunks
         };
     }
 
-    private MapContainer ResolveMapContainer(BinTree shippingBinTree, string mapContainerLink)
+    private static MapContainer ResolveMapContainer(
+        BinTree shippingBinTree,
+        string mapContainerLink
+    )
     {
         var mapContainerObject = shippingBinTree.Objects[Fnv1a.HashLower(mapContainerLink)];
         return MetaSerializer.Deserialize<MapContainer>(
@@ -188,10 +189,7 @@ internal class MapConverter
         return materialsBin
             .Objects.Values.Where(x => x.ClassHash == staticMaterialDefClassHash)
             .Select(x => new StaticMaterialPackage(
-                MetaSerializer.Deserialize<StaticMaterialDef>(
-                    MetaEnvironmentService.Environment,
-                    x
-                )
+                MetaSerializer.Deserialize<StaticMaterialDef>(MetaEnvironmentService.Environment, x)
             ));
     }
 
@@ -210,6 +208,22 @@ internal class MapConverter
                 )
             ))
             .ToDictionary();
+    }
+
+    private Dictionary<string, string> CreateMeshVisibilityControllerResolver(
+        EnvironmentAsset environmentAsset
+    )
+    {
+        Dictionary<string, string> map = [];
+        foreach (var mesh in environmentAsset.Meshes)
+        {
+            map.Add(
+                mesh.Name,
+                BinHashtableService.ResolveObjectHash(mesh.VisibilityControllerPathHash)
+            );
+        }
+
+        return map;
     }
 
     private BinTree ResolveMapShippingBinTree(WadFile wad, string mapName)
