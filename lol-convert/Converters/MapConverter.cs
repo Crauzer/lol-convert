@@ -16,7 +16,7 @@ using lol_convert.Services;
 using lol_convert.Utils;
 using lol_convert.Wad;
 using Serilog;
-using Meta = LeagueToolkit.Meta.Classes;
+using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Converters;
 
@@ -166,7 +166,10 @@ internal class MapConverter
             Name = mapSkinDefinition.Name.ToLower(),
             Container = container,
             StaticMaterials = staticMaterialPackages,
-            MeshVisibilityControllerResolver = CreateMeshVisibilityControllerResolver(environmentAsset),
+            VisibilityControllers = CollectMapVisibilityControllers(materialsBin),
+            MeshVisibilityControllerResolver = CreateMeshVisibilityControllerResolver(
+                environmentAsset
+            ),
             Chunks = chunks
         };
     }
@@ -210,7 +213,7 @@ internal class MapConverter
             .ToDictionary();
     }
 
-    private Dictionary<string, string> CreateMeshVisibilityControllerResolver(
+    private static Dictionary<string, string> CreateMeshVisibilityControllerResolver(
         EnvironmentAsset environmentAsset
     )
     {
@@ -224,6 +227,69 @@ internal class MapConverter
         }
 
         return map;
+    }
+
+    private static Dictionary<string, MapVisibilityControllerBase> CollectMapVisibilityControllers(
+        BinTree materialsBin
+    )
+    {
+        Dictionary<string, MapVisibilityControllerBase> map = [];
+        foreach (var treeObject in materialsBin.Objects)
+        {
+            MapVisibilityControllerBase package = DeserializeMapVisibilityController(
+                treeObject.Value
+            ) switch
+            {
+                MetaClass.ChildMapVisibilityController childMapVisibilityController
+                    => new ChildMapVisibilityControllerPackage(childMapVisibilityController),
+                MetaClass.Class0x6b863734 class0x6b863734
+                    => new LegacyMapVisibilityControllerPackage(class0x6b863734),
+                MetaClass.Class0xec733fe2 class0xec733fe2
+                    => new Parent2MapVisibilityControllerPackage(class0xec733fe2),
+                MetaClass.Class0xe07edfa4 class0xe07edfa4
+                    => new Parent1MapVisibilityControllerPackage(class0xe07edfa4),
+                _ => null
+            };
+
+            if (package is not null)
+            {
+                map.Add(BinHashtableService.ResolveObjectHash(treeObject.Key), package);
+            }
+        }
+
+        return map;
+    }
+
+    private static MetaClass.IMapVisibilityController DeserializeMapVisibilityController(
+        BinTreeObject treeObject
+    )
+    {
+        return treeObject.ClassHash switch
+        {
+            _
+                when treeObject.ClassHash
+                    == Fnv1a.HashLower(nameof(MetaClass.ChildMapVisibilityController))
+                => MetaSerializer.Deserialize<MetaClass.ChildMapVisibilityController>(
+                    MetaEnvironmentService.Environment,
+                    treeObject
+                ),
+            0x6b863734
+                => MetaSerializer.Deserialize<MetaClass.Class0x6b863734>(
+                    MetaEnvironmentService.Environment,
+                    treeObject
+                ),
+            0xe07edfa4
+                => MetaSerializer.Deserialize<MetaClass.Class0xe07edfa4>(
+                    MetaEnvironmentService.Environment,
+                    treeObject
+                ),
+            0xec733fe2
+                => MetaSerializer.Deserialize<MetaClass.Class0xec733fe2>(
+                    MetaEnvironmentService.Environment,
+                    treeObject
+                ),
+            _ => null
+        };
     }
 
     private BinTree ResolveMapShippingBinTree(WadFile wad, string mapName)
