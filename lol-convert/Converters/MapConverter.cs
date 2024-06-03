@@ -202,7 +202,7 @@ internal class MapConverter
         return materialsBin
             .Objects.Values.Where(x => x.ClassHash == mapPlaceableContainerClassHash)
             .Select(treeObject => new KeyValuePair<string, MapPlaceableContainerPackage>(
-                BinHashtableService.ResolveObjectHash(treeObject.PathHash),
+                BinHashtableService.ResolveObjectLink(treeObject.PathHash),
                 new(
                     MetaSerializer.Deserialize<MapPlaceableContainer>(
                         MetaEnvironmentService.Environment,
@@ -222,7 +222,7 @@ internal class MapConverter
         {
             map.Add(
                 mesh.Name,
-                BinHashtableService.ResolveObjectHash(mesh.VisibilityControllerPathHash)
+                BinHashtableService.ResolveObjectLink(mesh.VisibilityControllerPathHash)
             );
         }
 
@@ -253,7 +253,7 @@ internal class MapConverter
 
             if (package is not null)
             {
-                map.Add(BinHashtableService.ResolveObjectHash(treeObject.Key), package);
+                map.Add(BinHashtableService.ResolveObjectLink(treeObject.Key), package);
             }
         }
 

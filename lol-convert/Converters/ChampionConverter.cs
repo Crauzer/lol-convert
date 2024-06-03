@@ -10,6 +10,7 @@ using LeagueToolkit.Meta;
 using LeagueToolkit.Meta.Classes;
 using lol_convert.Meta;
 using lol_convert.Packages;
+using lol_convert.Services;
 using lol_convert.Utils;
 using lol_convert.Wad;
 using Serilog;
@@ -85,7 +86,7 @@ internal class ChampionConverter
         return new() { Name = championName, SkinNames = skins.Select(x => x.Name).ToList() };
     }
 
-    private void SaveChampionSkinPackage(string championName, ChampionSkin skin)
+    private void SaveChampionSkinPackage(string championName, ChampionSkinPackage skin)
     {
         Log.Information(
             "Saving champion skin package (championName: {championName}, skinName: {skinName})",
@@ -115,14 +116,14 @@ internal class ChampionConverter
         return championPackagePath;
     }
 
-    private List<ChampionSkin> CreateChampionSkins(
+    private List<ChampionSkinPackage> CreateChampionSkins(
         string championName,
         WadFile wad,
         List<string> chunkPaths
     )
     {
         var skinBinPaths = ConvertUtils.GlobChampionSkinBinPaths(championName, chunkPaths).ToList();
-        List<ChampionSkin> skins = new(skinBinPaths.Count);
+        List<ChampionSkinPackage> skins = new(skinBinPaths.Count);
         foreach (string skinBinPath in skinBinPaths)
         {
             string skinName = Path.GetFileNameWithoutExtension(skinBinPath);
@@ -160,7 +161,7 @@ internal class ChampionConverter
         return skins;
     }
 
-    private ChampionSkin CreateChampionSkin(
+    private ChampionSkinPackage CreateChampionSkin(
         string championName,
         string skinName,
         BinTree bin,
@@ -174,22 +175,19 @@ internal class ChampionConverter
         var binObjectContainer = BinObjectContainer.FromPropertyBin(bin, wad);
         var staticMaterials = CreateChampionSkinMaterials(binObjectContainer.Objects.Values);
 
-        ChampionSkin skin =
+        ChampionSkinPackage skin =
             new()
             {
                 Name = skinName,
                 DisplayName = "TODO",
                 SkinMeshPath = meshAssetPath,
-                SkinScale = 1.0f,
                 Materials = staticMaterials
             };
 
-        var skinPropertiesObject = bin.Objects[Fnv1a.HashLower(skinPropertiesObjectPath)];
         var skinProperties = MetaSerializer.Deserialize<SkinCharacterDataProperties>(
-            _metaEnvironment,
-            skinPropertiesObject
+            MetaEnvironmentService.Environment,
+            bin.Objects[Fnv1a.HashLower(skinPropertiesObjectPath)]
         );
-
         if (
             skinProperties.SkinMeshProperties?.Value
             is not SkinMeshDataProperties skinMeshProperties
@@ -199,6 +197,8 @@ internal class ChampionConverter
         }
 
         skin.SkinScale = skinMeshProperties.SkinScale;
+        skin.Material = BinHashtableService.ResolveObjectLink(skinMeshProperties.Material);
+        skin.MaterialOverrides = CollectMaterialOverrides(skinMeshProperties);
 
         ProduceChampionSkinMesh(
             championName,
@@ -247,6 +247,15 @@ internal class ChampionConverter
         return materialPackages;
     }
 
+    private static List<SkinMeshMaterialOverridePackage> CollectMaterialOverrides(
+        MetaClass.SkinMeshDataProperties skinMeshDataProperties
+    ) =>
+        skinMeshDataProperties
+            .MaterialOverride?.Select(materialOverride => new SkinMeshMaterialOverridePackage(
+                materialOverride
+            ))
+            .ToList() ?? [];
+
     private void ProduceChampionSkinMesh(
         string championName,
         string skinName,
@@ -279,7 +288,9 @@ internal class ChampionConverter
         var animations = LoadAnimations(animationPaths, wad);
 
         Log.Verbose("Saving glTf -> {meshAssetPath}", meshAssetPath);
-        simpleSkin.ToGltf(rig, new List<(string, Stream)>(), animations).Save(absoluteMeshAssetPath);
+        simpleSkin
+            .ToGltf(rig, new List<(string, Stream)>(), animations)
+            .Save(absoluteMeshAssetPath);
     }
 
     private AnimationGraphPackage CreateAnimationGraph(

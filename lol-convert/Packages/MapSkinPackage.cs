@@ -36,7 +36,7 @@ internal class MapContainerPackage
         {
             this.Chunks.Add(
                 BinHashtableService.ResolveHash(chunk.Key),
-                BinHashtableService.ResolveObjectHash(chunk.Value)
+                BinHashtableService.ResolveObjectLink(chunk.Value)
             );
         }
     }
@@ -73,7 +73,7 @@ internal class MapPlaceableContainerPackage
 [JsonDerivedType(typeof(Parent1MapVisibilityControllerPackage), "parent1_controller")]
 internal class MapVisibilityControllerBase(MetaClass.IMapVisibilityController controller)
 {
-    public string Path { get; set; } = BinHashtableService.ResolveObjectHash(controller.PathHash);
+    public string Path { get; set; } = BinHashtableService.ResolveObjectLink(controller.PathHash);
 }
 
 internal class ChildMapVisibilityControllerPackage(
@@ -82,7 +82,7 @@ internal class ChildMapVisibilityControllerPackage(
 {
     public uint ParentMode { get; set; } = controller.ParentMode;
     public List<string> Parents { get; set; } =
-        controller.Parents.Select(x => BinHashtableService.ResolveObjectHash(x)).ToList();
+        controller.Parents.Select(x => BinHashtableService.ResolveObjectLink(x)).ToList();
 }
 
 internal class LegacyMapVisibilityControllerPackage(MetaClass.Class0x6b863734 controller)
