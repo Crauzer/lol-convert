@@ -9,6 +9,7 @@ using LeagueToolkit.Core.Environment;
 using LeagueToolkit.Core.Meta;
 using LeagueToolkit.Core.Wad;
 using LeagueToolkit.Hashing;
+using LeagueToolkit.IO.MapGeometryFile;
 using LeagueToolkit.Meta;
 using LeagueToolkit.Meta.Classes;
 using lol_convert.Packages;
@@ -123,19 +124,13 @@ internal class MapConverter
         WadFile wad
     )
     {
-        Log.Information(
-            "Creating map skin package (mapSkinName = {mapSkinName})",
-            mapSkinDefinition.Name
-        );
+        string skinName = mapSkinDefinition.Name.ToLower();
 
+        Log.Information("Creating map skin package (mapSkinName = {0})", skinName);
         Directory.CreateDirectory(
-            Path.Combine(
-                _outputPath,
-                "data",
-                "maps",
-                mapName,
-                "skins",
-                mapSkinDefinition.Name.ToLower()
+            Path.Join(
+                this._outputPath,
+                PathBuilder.GenerateMapSkinDataDirectoryPath(mapName, skinName)
             )
         );
 
@@ -157,20 +152,20 @@ internal class MapConverter
             .Select(x => new KeyValuePair<string, StaticMaterialPackage>(x.Name, x))
             .ToDictionary();
 
-        var chunks = CollectChunks(materialsBin);
-
-        var container = new MapContainerPackage(mapContainer);
+        TrySaveMapAsset(mapName, skinName, environmentAsset, materialsBin);
 
         return new()
         {
             Name = mapSkinDefinition.Name.ToLower(),
-            Container = container,
+            AssetPath = PathBuilder.GenerateMapSkinAssetPath(mapName, skinName),
+            Container = new(mapContainer),
             StaticMaterials = staticMaterialPackages,
+            ShaderTextureOverrides = environmentAsset
+                .ShaderTextureOverrides.Select(x => new MapShaderTextureOverridePackage(x))
+                .ToList(),
             VisibilityControllers = CollectMapVisibilityControllers(materialsBin),
-            MeshVisibilityControllerResolver = CreateMeshVisibilityControllerResolver(
-                environmentAsset
-            ),
-            Chunks = chunks
+            Meshes = CreateMapMeshes(environmentAsset),
+            Chunks = CollectChunks(materialsBin)
         };
     }
 
@@ -213,16 +208,36 @@ internal class MapConverter
             .ToDictionary();
     }
 
-    private static Dictionary<string, string> CreateMeshVisibilityControllerResolver(
+    private static Dictionary<string, MapMeshPackage> CreateMapMeshes(
         EnvironmentAsset environmentAsset
     )
     {
-        Dictionary<string, string> map = [];
-        foreach (var mesh in environmentAsset.Meshes)
+        Dictionary<string, MapMeshPackage> map = [];
+        foreach (EnvironmentAssetMesh mesh in environmentAsset.Meshes)
         {
             map.Add(
                 mesh.Name,
-                BinHashtableService.ResolveObjectLink(mesh.VisibilityControllerPathHash)
+                new()
+                {
+                    LegacyVisibilityFlags = (byte)mesh.VisibilityFlags,
+                    VisibilityController =
+                        mesh.VisibilityControllerPathHash != 0
+                            ? BinHashtableService.ResolveObjectLink(
+                                mesh.VisibilityControllerPathHash
+                            )
+                            : null,
+                    DisableBackfaceCulling = mesh.DisableBackfaceCulling,
+                    QualityFilter = (byte)mesh.EnvironmentQualityFilter,
+                    LayerTransitionBehavior = (byte)mesh.LayerTransitionBehavior,
+                    RenderFlags = (ushort)mesh.RenderFlags,
+                    StationaryLight = new(mesh.StationaryLight),
+                    BakedLight = new(mesh.BakedLight),
+                    TextureOverrides = mesh
+                        .TextureOverrides.Select(x => new MapMeshTextureOverridePackage(x))
+                        .ToList(),
+                    BakedPaintScale = mesh.BakedPaintScale,
+                    BakedPaintBias = mesh.BakedPaintBias
+                }
             );
         }
 
@@ -292,12 +307,64 @@ internal class MapConverter
         };
     }
 
-    private BinTree ResolveMapShippingBinTree(WadFile wad, string mapName)
+    private static BinTree ResolveMapShippingBinTree(WadFile wad, string mapName)
     {
         string mapShippingPath = $"data/maps/shipping/{mapName}/{mapName}.bin";
 
         using var mapShippingBinStream = wad.LoadChunkDecompressed(mapShippingPath).AsStream();
         return new(mapShippingBinStream);
+    }
+
+    private void TrySaveMapAsset(
+        string mapName,
+        string mapSkinName,
+        EnvironmentAsset environmentAsset,
+        BinTree materialsBin
+    )
+    {
+        try
+        {
+            Log.Information(
+                "Saving map asset (mapName: {0}, mapSkinName: {1})",
+                mapName,
+                mapSkinName
+            );
+
+            Directory.CreateDirectory(
+                Path.Join(
+                    this._outputPath,
+                    PathBuilder.GenerateMapSkinAssetDirectoryPath(mapName, mapSkinName)
+                )
+            );
+
+            environmentAsset
+                .ToGltf(
+                    materialsBin,
+                    new()
+                    {
+                        MetaEnvironment = MetaEnvironmentService.Environment,
+                        Settings = new()
+                        {
+                            LayerGroupingPolicy = MapGeometryGltfLayerGroupingPolicy.Ignore
+                        }
+                    }
+                )
+                .SaveGLB(
+                    Path.Join(
+                        this._outputPath,
+                        PathBuilder.GenerateMapSkinAssetPath(mapName, mapSkinName)
+                    )
+                );
+        }
+        catch (Exception e)
+        {
+            Log.Error(
+                e,
+                "Failed to save map asset (mapName: {0}, mapSkinName: {1})",
+                mapName,
+                mapSkinName
+            );
+        }
     }
 
     private void SaveMapPackage(MapPackage map)

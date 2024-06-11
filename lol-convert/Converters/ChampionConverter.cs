@@ -197,7 +197,11 @@ internal class ChampionConverter
         }
 
         skin.SkinScale = skinMeshProperties.SkinScale;
-        skin.Material = BinHashtableService.ResolveObjectLink(skinMeshProperties.Material);
+        skin.Material =
+            skinMeshProperties.Material != 0
+                ? BinHashtableService.ResolveObjectLink(skinMeshProperties.Material)
+                : null;
+        skin.Texture = skinMeshProperties.Texture;
         skin.MaterialOverrides = CollectMaterialOverrides(skinMeshProperties);
 
         ProduceChampionSkinMesh(

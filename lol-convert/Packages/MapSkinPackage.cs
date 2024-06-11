@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Text.Json.Serialization;
+using LeagueToolkit.Core.Environment;
 using lol_convert.Services;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
@@ -8,12 +9,49 @@ namespace lol_convert.Packages;
 internal class MapSkinPackage
 {
     public string Name { get; set; }
+    public string AssetPath { get; set; }
     public MapContainerPackage Container { get; set; }
     public Dictionary<string, StaticMaterialPackage> StaticMaterials { get; set; }
-
-    public Dictionary<string, string> MeshVisibilityControllerResolver { get; set; }
+    public List<MapShaderTextureOverridePackage> ShaderTextureOverrides { get; set; } = [];
+    public Dictionary<string, MapMeshPackage> Meshes { get; set; }
     public Dictionary<string, MapVisibilityControllerBase> VisibilityControllers { get; set; }
     public Dictionary<string, MapPlaceableContainerPackage> Chunks { get; set; }
+}
+
+internal class MapMeshPackage
+{
+    public string VisibilityController { get; set; }
+    public byte LegacyVisibilityFlags { get; set; }
+
+    public bool DisableBackfaceCulling { get; set; }
+    public byte QualityFilter { get; set; }
+    public byte LayerTransitionBehavior { get; set; }
+    public ushort RenderFlags { get; set; }
+
+    public MapMeshChannelPackage StationaryLight { get; set; }
+    public MapMeshChannelPackage BakedLight { get; set; }
+    public List<MapMeshTextureOverridePackage> TextureOverrides { get; set; } = [];
+    public Vector2 BakedPaintScale { get; set; }
+    public Vector2 BakedPaintBias { get; set; }
+}
+
+internal class MapMeshTextureOverridePackage(EnvironmentAssetMeshTextureOverride textureOverride)
+{
+    public int Index { get; set; } = textureOverride.Index;
+    public string Texture { get; set; } = textureOverride.Texture;
+}
+
+internal class MapShaderTextureOverridePackage(EnvironmentAssetShaderTextureOverride textureOverride)
+{
+    public int Index { get; set; } = textureOverride.Index;
+    public string Name { get; set; } = textureOverride.Name;
+}
+
+internal class MapMeshChannelPackage(EnvironmentAssetChannel channel)
+{
+    public string Texture { get; set; } = channel.Texture;
+    public Vector2 Scale { get; set; } = channel.Scale;
+    public Vector2 Bias { get; set; } = channel.Bias;
 }
 
 internal class MapContainerPackage
