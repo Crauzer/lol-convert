@@ -17,4 +17,6 @@ internal class VfxConverter
         this._metaEnvironment = metaEnvironment;
         this._outputPath = outputPath;
     }
+
+    
 }
