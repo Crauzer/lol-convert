@@ -13,7 +13,7 @@ internal class VfxColor(MetaClass.ValueColor color)
             MetaClass.VfxAnimatedColor dynamics => new VfxColorDynamics(dynamics),
             MetaClass.VfxAnimatedColorVariableData dynamics
                 => new VfxColorVariableDynamics(dynamics),
-            _ => throw new InvalidOperationException("Unknown Vector3 dynamics")
+            _ => throw new InvalidOperationException("Unknown Color dynamics")
         };
 }
 
