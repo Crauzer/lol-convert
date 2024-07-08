@@ -159,6 +159,7 @@ internal class MapConverter
             Name = mapSkinDefinition.Name.ToLower(),
             AssetPath = PathBuilder.GenerateMapSkinAssetPath(mapName, skinName),
             Container = new(mapContainer),
+            VfxSystems = CollectVfxSystems(materialsBin),
             StaticMaterials = staticMaterialPackages,
             ShaderTextureOverrides = environmentAsset
                 .ShaderTextureOverrides.Select(x => new MapShaderTextureOverridePackage(x))
@@ -189,6 +190,21 @@ internal class MapConverter
             .Select(x => new StaticMaterialPackage(
                 MetaSerializer.Deserialize<StaticMaterialDef>(MetaEnvironmentService.Environment, x)
             ));
+    }
+
+    private Dictionary<string, VfxSystem> CollectVfxSystems(BinTree materialsBin)
+    {
+        var vfxSystemClassHash = Fnv1a.HashLower(nameof(MetaClass.VfxSystemDefinitionData));
+        return materialsBin
+            .Objects.Values.Where(x => x.ClassHash == vfxSystemClassHash)
+            .Select(x => new VfxSystem(
+                MetaSerializer.Deserialize<MetaClass.VfxSystemDefinitionData>(
+                    MetaEnvironmentService.Environment,
+                    x
+                )
+            ))
+            .Select(x => new KeyValuePair<string, VfxSystem>(x.ParticlePath, x))
+            .ToDictionary();
     }
 
     private Dictionary<string, MapPlaceableContainerPackage> CollectChunks(BinTree materialsBin)

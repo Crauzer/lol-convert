@@ -11,6 +11,7 @@ internal class MapSkinPackage
     public string Name { get; set; }
     public string AssetPath { get; set; }
     public MapContainerPackage Container { get; set; }
+    public Dictionary<string, VfxSystem> VfxSystems { get; set; }
     public Dictionary<string, StaticMaterialPackage> StaticMaterials { get; set; }
     public List<MapShaderTextureOverridePackage> ShaderTextureOverrides { get; set; } = [];
     public Dictionary<string, MapMeshPackage> Meshes { get; set; }

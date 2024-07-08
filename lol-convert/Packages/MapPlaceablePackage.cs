@@ -27,12 +27,11 @@ internal class MapParticlePackage(MetaClass.MapParticle mapParticle) : MapPlacea
     public string GroupName { get; set; } = mapParticle.GroupName;
     public int Quality { get; set; } = mapParticle.Quality;
     public bool StartDisabled { get; set; } = mapParticle.StartDisabled;
-    public string System { get; set; } = BinHashtableService.ResolveObjectLink(mapParticle.System);
+    public string System { get; set; } =
+        BinHashtableService.TryResolveObjectLink(mapParticle.System);
     public bool Transitional { get; set; } = mapParticle.Transitional;
     public string VisibilityController { get; set; } =
-        mapParticle.VisibilityController != 0
-            ? BinHashtableService.ResolveObjectLink(mapParticle.VisibilityController)
-            : null;
+        BinHashtableService.TryResolveObjectLink(mapParticle.VisibilityController);
     public uint VisibilityMode { get; set; } = mapParticle.VisibilityMode;
 }
 
@@ -44,9 +43,7 @@ internal class MapAudioPackage(MetaClass.MapAudio mapAudio) : MapPlaceableBase(m
     public float MinIntervalSec { get; set; } = mapAudio.MinIntervalSec;
     public float StartTime { get; set; } = mapAudio.StartTime;
     public string VisibilityController { get; set; } =
-        mapAudio.VisibilityController != 0
-            ? BinHashtableService.ResolveObjectLink(mapAudio.VisibilityController)
-            : null;
+        BinHashtableService.TryResolveObjectLink(mapAudio.VisibilityController);
 }
 
 internal class GdsMapObjectPackage(MetaClass.GdsMapObject gdsMapObject)
@@ -70,9 +67,7 @@ internal class GdsMapObjectPackage(MetaClass.GdsMapObject gdsMapObject)
     public bool EyeCandy { get; set; } = gdsMapObject.EyeCandy;
     public bool IgnoreCollisionOnPlacement { get; set; } = gdsMapObject.IgnoreCollisionOnPlacement;
     public string VisibilityController { get; set; } =
-        gdsMapObject.VisibilityController != 0
-            ? BinHashtableService.ResolveObjectLink(gdsMapObject.VisibilityController)
-            : null;
+        BinHashtableService.TryResolveObjectLink(gdsMapObject.VisibilityController);
     public uint MapObjectSkinId { get; set; } = gdsMapObject.MapObjectSkinId;
     public byte Type { get; set; } = gdsMapObject.Type;
 }
@@ -95,5 +90,5 @@ internal class GdsMapObjectBannerInfoPackage(MetaClass.GdsMapObjectBannerInfo ba
     : GdsMapObjectExtraInfoPackage
 {
     public string BannerData { get; set; } =
-        BinHashtableService.ResolveObjectLink(bannerInfo.BannerData);
+        BinHashtableService.TryResolveObjectLink(bannerInfo.BannerData);
 }
