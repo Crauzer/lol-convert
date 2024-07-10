@@ -30,6 +30,38 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public VfxVector3 BirthVelocity { get; set; } = new(emitter.BirthVelocity);
     public byte BlendMode { get; set; } = emitter.BlendMode;
     public Vector4 CensorModulateValue { get; set; } = emitter.CensorModulateValue;
+    public float ChanceToNotExist { get; set; } = emitter.ChanceToNotExist;
+    public VfxChildParticleSet ChildParticleSet { get; set; } = new(emitter.ChildParticleSetDefinition);
+    public VfxColor Color { get; set; } = new(emitter.Color);
+    public byte ColorblindVisibility { get; set; } = emitter.ColorblindVisibility;
+    public Vector2 ColorLookUpOffsets { get; set; } = emitter.ColorLookUpOffsets;
+    public Vector2 ColorLookUpScales { get; set; } = emitter.ColorLookUpScales;
+    public byte ColorLookUpTypeX { get; set; } = emitter.ColorLookUpTypeX;
+    public byte ColorLookUpTypeY { get; set; } = emitter.ColorLookUpTypeY;
+    public byte ColorRenderFlags { get; set; } = emitter.ColorRenderFlags;
+    public VfxMaterial Material { get; set; } = new(emitter.CustomMaterial);
+    public Vector2 DepthBiasFactors { get; set; } = emitter.DepthBiasFactors;
+    public float DirectionVelocityMinScale { get; set; } = emitter.DirectionVelocityMinScale;
+    public float DirectionVelocityScale { get; set; } = emitter.DirectionVelocityScale;
+    public bool DisableBackfaceCulling { get; set; } = emitter.DisableBackfaceCull;
+    public bool IsDisabled { get; set; } = emitter.Disabled;
+    public VfxDistortion Distortion { get; set; } = new(emitter.DistortionDefinition);
+    public byte DoesCastShadow { get; set; } = emitter.DoesCastShadow;
+    public byte DoesLifetimeScale { get; set; } = emitter.DoesLifetimeScale;
+    public VfxVector3 Drag { get; set; } = new(emitter.Drag);
+    public string EmissionMeshName { get; set; } = emitter.EmissionMeshName;
+    public float EmissionMeshScale { get; set; } = emitter.EmissionMeshScale;
+    public VfxEmissionSurface EmissionSurface { get; set; } = new(emitter.EmissionSurfaceDefinition);
+    public float? EmitterLinger { get; set; } = emitter.EmitterLinger;
+    public string EmitterName { get; set; } = emitter.EmitterName;
+    public VfxVector3 EmitterPosition { get; set; } = new(emitter.EmitterPosition);
+    public Vector2 EmitterUvScrollRate { get; set; } = emitter.EmitterUvScrollRate;
+    public string FalloffTexture { get; set; } = emitter.FalloffTexture;
+    public VfxFieldCollection FieldCollection { get; set; } = new(emitter.FieldCollectionDefinition);
+    public VfxEmitterFiltering Filtering { get; set; } = new(emitter.Filtering);
+    public VfxFlexVector3 FlexBirthRotationalVelocity0 { get; set; } = new(emitter.FlexBirthRotationalVelocity0);
+    public VfxFlexVector2 FlexBirthUvOffset { get; set; } = new(emitter.FlexBirthUvoffset);
+    public VfxFlexVector3 FlexBirthVelocity { get; set; } = new(emitter.FlexBirthVelocity);
 }
 
 internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaErosion)
@@ -38,6 +70,36 @@ internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaEros
 }
 
 internal class VfxEmitterAudio(MetaClass.VfxEmitterAudio emitterAudio)
+{
+
+}
+
+internal class VfxChildParticleSet(MetaClass.VfxChildParticleSetDefinitionData childParticleSet)
+{
+
+}
+
+internal class VfxMaterial(MetaClass.VfxMaterialDefinitionData material)
+{
+
+}
+
+internal class VfxDistortion(MetaClass.VfxDistortionDefinitionData distortion)
+{
+
+}
+
+internal class VfxEmissionSurface(MetaClass.VfxEmissionSurfaceData emissionSurface)
+{
+
+}
+
+internal class VfxFieldCollection(MetaClass.VfxFieldCollectionDefinitionData fieldCollection)
+{
+
+}
+
+internal class VfxEmitterFiltering(MetaClass.VfxEmitterFiltering emitterFiltering)
 {
 
 }

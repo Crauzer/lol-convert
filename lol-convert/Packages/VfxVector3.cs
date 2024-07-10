@@ -4,6 +4,12 @@ using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Packages;
 
+internal class VfxFlexVector3(MetaClass.FlexValueVector3 flexVector)
+{
+    public uint FlexId { get; set; } = flexVector.FlexId;
+    public VfxVector3 Value { get; set; } = new(flexVector.Value);
+}
+
 internal class VfxVector3(MetaClass.ValueVector3 vector)
 {
     public Vector3 ConstantValue { get; set; } = vector.ConstantValue;

@@ -3,6 +3,12 @@ using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Packages;
 
+internal class VfxFlexFloat(MetaClass.FlexValueFloat flexValueFloat)
+{
+    public uint FlexId { get; set; } = flexValueFloat.FlexId;
+    public VfxFloat Value { get; set; } = new(flexValueFloat.Value);
+}
+
 internal class VfxFloat(MetaClass.ValueFloat valueFloat)
 {
     public float ConstantValue { get; set; } = valueFloat.ConstantValue;
