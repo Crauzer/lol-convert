@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using lol_convert.Services;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Packages;
@@ -106,6 +108,52 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public VfxFlexShapeDefinition FlexShapeDefinition { get; set; } =
         emitter.FlexShapeDefinition is null ? null : new(emitter.FlexShapeDefinition);
     public float FrameRate { get; set; } = emitter.FrameRate;
+    public bool HasPostRotateOrientation { get; set; } = emitter.HasPostRotateOrientation;
+    public bool HasVariableStartTime { get; set; } = emitter.HasVariableStartTime;
+    public byte Importance { get; set; } = emitter.Importance;
+    public bool IsDirectionOriented { get; set; } = emitter.IsDirectionOriented;
+    public bool IsEmitterSpace { get; set; } = emitter.IsEmitterSpace;
+    public bool IsFollowingTerrain { get; set; } = emitter.IsFollowingTerrain;
+    public bool IsGroundLayer { get; set; } = emitter.IsGroundLayer;
+    public bool IsLocalOrientation { get; set; } = emitter.IsLocalOrientation;
+    public bool IsRandomStartFrame { get; set; } = emitter.IsRandomStartFrame;
+    public bool IsRotationEnabled { get; set; } = emitter.IsRotationEnabled;
+    public bool IsSingleParticle { get; set; } = emitter.IsSingleParticle;
+    public bool IsTexturePixelated { get; set; } = emitter.IsTexturePixelated;
+    public bool IsUniformScale { get; set; } = emitter.IsUniformScale;
+    public VfxLegacySimple LegacySimple { get; set; } =
+        emitter.LegacySimple is null ? null : new(emitter.LegacySimple);
+    public float? Lifetime { get; set; } = emitter.Lifetime;
+    public VfxLinger Linger { get; set; } = emitter.Linger is null ? null : new(emitter.Linger);
+    public float m3407065073 { get; set; } = emitter.m3407065073;
+    public bool m3522070068 { get; set; } = emitter.m3522070068;
+    public List<VfxMaterialOverride> MaterialOverrides { get; set; } =
+        emitter.MaterialOverrideDefinitions?.Select(x => new VfxMaterialOverride(x)).ToList() ?? [];
+    public float MaximumRateByVelocity { get; set; } = emitter.MaximumRateByVelocity;
+    public byte MeshRenderFlags { get; set; } = emitter.MeshRenderFlags;
+    public byte MiscRenderFlags { get; set; } = emitter.MiscRenderFlags;
+    public Vector4 ModulationFactor { get; set; } = emitter.ModulationFactor;
+    public ushort NumFrames { get; set; } = emitter.NumFrames;
+    public byte OffsetLifeScalingSymmetryMode { get; set; } = emitter.OffsetLifeScalingSymmetryMode;
+    public Vector3 OffsetLifetimeScaling { get; set; } = emitter.OffsetLifetimeScaling;
+    public VfxPalette Palette { get; set; } =
+        emitter.PaletteDefinition is null ? null : new(emitter.PaletteDefinition);
+    public string ParticleColorTexture { get; set; } = emitter.ParticleColorTexture;
+    public bool ParticleIsLocalOrientation { get; set; } = emitter.ParticleIsLocalOrientation;
+    public VfxFloat ParticleLifetime { get; set; } =
+        emitter.ParticleLifetime is null ? null : new(emitter.ParticleLifetime);
+    public float? ParticleLinger { get; set; } = emitter.ParticleLinger;
+    public byte ParticleLingerType { get; set; } = emitter.ParticleLingerType;
+    public bool ParticlesShareRandomValue { get; set; } = emitter.ParticlesShareRandomValue;
+    public VfxFloat ParticleUvRotateRate { get; set; } =
+        emitter.ParticleUvRotateRate is null ? null : new(emitter.ParticleUvRotateRate);
+    public VfxVector2 ParticleUvScrollRate { get; set; } =
+        emitter.ParticleUvScrollRate is null ? null : new(emitter.ParticleUvScrollRate);
+    public short Pass { get; set; }
+    public float? Period { get; set; }
+    public Vector3 PostRotateOrientationAxis { get; set; } = emitter.PostRotateOrientationAxis;
+    public VfxPrimitiveBase Primitive { get; set; } =
+        emitter.Primitive is null ? null : new(emitter.Primitive);
 }
 
 internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaErosion) { }
@@ -125,3 +173,55 @@ internal class VfxFieldCollection(MetaClass.VfxFieldCollectionDefinitionData fie
 internal class VfxEmitterFiltering(MetaClass.VfxEmitterFiltering emitterFiltering) { }
 
 internal class VfxFlexShapeDefinition(MetaClass.VfxFlexShapeDefinitionData flexShape) { }
+
+internal class VfxLegacySimple(MetaClass.VfxEmitterLegacySimple legacySimple) { }
+
+internal class VfxLinger(MetaClass.VfxLingerDefinitionData linger) { }
+
+internal class VfxMaterialOverride(MetaClass.VfxMaterialOverrideDefinitionData materialOverride) { }
+
+internal class VfxPalette(MetaClass.VfxPaletteDefinitionData palette) { }
+
+[JsonDerivedType(typeof(VfxPrimitiveArbitraryQuad), "arbitrary_quad")]
+[JsonDerivedType(typeof(VfxPrimitiveBeam), "beam")]
+internal class VfxPrimitiveBase
+{
+    public VfxPrimitiveBase(MetaClass.VfxPrimitiveBase primitive) { }
+}
+
+internal class VfxPrimitiveArbitraryQuad(MetaClass.VfxPrimitiveArbitraryQuad primitive)
+    : VfxPrimitiveBase(primitive) { }
+
+internal class VfxPrimitiveBeam(MetaClass.VfxPrimitiveBeam primitive) : VfxPrimitiveBase(primitive)
+{
+    public VfxBeam Beam { get; set; } = primitive.Beam is null ? null : new(primitive.Beam);
+    public VfxMesh Mesh { get; set; } = primitive.Mesh is null ? null : new(primitive.Mesh);
+}
+
+internal class VfxBeam(MetaClass.VfxBeamDefinitionData beam)
+{
+    public VfxColor AnimatedColorWithDistance { get; set; } =
+        beam.AnimatedColorWithDistance is null ? null : new(beam.AnimatedColorWithDistance);
+    public VfxVector3 BirthTilingSize { get; set; } =
+        beam.BirthTilingSize is null ? null : new(beam.BirthTilingSize);
+    public bool IsColorBindedWithDistance { get; set; } = beam.IsColorBindedWithDistance;
+    public Vector3 LocalSpaceSourceOffset { get; set; } = beam.LocalSpaceSourceOffset;
+    public Vector3 LocalSpaceTargetOffset { get; set; } = beam.LocalSpaceTargetOffset;
+    public byte Mode { get; set; } = beam.Mode;
+    public int Segments { get; set; } = beam.Segments;
+    public byte TrailMode { get; set; } = beam.TrailMode;
+}
+
+internal class VfxMesh(MetaClass.VfxMeshDefinitionData mesh)
+{
+    public string AnimationName { get; set; } = mesh.AnimationName;
+    public List<string> AnimationVariants { get; set; } = mesh.AnimationVariants?.ToList();
+    public bool LockMeshToAttachment { get; set; } = mesh.LockMeshToAttachment;
+    public string MeshName { get; set; } = mesh.MeshName;
+    public string MeshSkeletonName { get; set; } = mesh.MeshSkeletonName;
+    public string SimpleMeshName { get; set; } = mesh.SimpleMeshName;
+    public List<string> SubmeshesToDraw { get; set; } =
+        mesh.SubmeshesToDraw?.Select(x => BinHashtableService.ResolveHash(x)).ToList();
+    public List<string> SubmeshesToDrawAlways { get; set; } =
+        mesh.SubmeshesToDrawAlways?.Select(x => BinHashtableService.ResolveHash(x)).ToList();
+}
