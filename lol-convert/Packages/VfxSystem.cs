@@ -66,7 +66,7 @@ internal class VfxMaterialOverride(MetaClass.VfxMaterialOverrideDefinitionData m
 
 internal class VfxProbabilityTable(MetaClass.VfxProbabilityTableData table)
 {
-    public List<float> KeyTimes = [.. table.KeyTimes];
-    public List<float> KeyValues = [.. table.KeyValues];
+    public List<float> KeyTimes = [.. table.KeyTimes ?? []];
+    public List<float> KeyValues = [.. table.KeyValues ?? []];
     public float SingleValue = table.SingleValue;
 }

@@ -7,7 +7,7 @@ namespace lol_convert.Packages;
 internal class VfxFlexVector2(MetaClass.FlexValueVector2 flexVector)
 {
     public uint FlexId { get; set; } = flexVector.FlexId;
-    public VfxVector2 Value { get; set; } = new(flexVector.Value);
+    public VfxVector2 Value { get; set; } = flexVector.Value is null ? null : new(flexVector.Value);
 }
 
 internal class VfxVector2(MetaClass.ValueVector2 vector)
@@ -17,7 +17,9 @@ internal class VfxVector2(MetaClass.ValueVector2 vector)
         vector.Dynamics switch
         {
             MetaClass.VfxAnimatedVector2f dynamics => new VfxVector2Dynamics(dynamics),
-            MetaClass.VfxAnimatedVector2fVariableData dynamics => new VfxVector2VariableDynamics(dynamics),
+            MetaClass.VfxAnimatedVector2fVariableData dynamics
+                => new VfxVector2VariableDynamics(dynamics),
+            null => null,
             _ => throw new InvalidOperationException("Unknown Vector2 dynamics")
         };
 }
@@ -28,15 +30,18 @@ internal class VfxVector2DynamicsBase { }
 
 internal class VfxVector2Dynamics(MetaClass.VfxAnimatedVector2f dynamics) : VfxVector2DynamicsBase
 {
-    public List<byte> Modes { get; set; } = [.. dynamics.Modes];
-    public List<Vector2> Values { get; set; } = [.. dynamics.Values];
-    public List<float> Times { get; set; } = [.. dynamics.Times];
+    public List<byte> Modes { get; set; } = dynamics.Modes is null ? null : [.. dynamics.Modes];
+    public List<Vector2> Values { get; set; } =
+        dynamics.Values is null ? null : [.. dynamics.Values];
+    public List<float> Times { get; set; } = dynamics.Times is null ? null : [.. dynamics.Times];
 }
 
-internal class VfxVector2VariableDynamics(MetaClass.VfxAnimatedVector2fVariableData dynamics) : VfxVector2DynamicsBase
+internal class VfxVector2VariableDynamics(MetaClass.VfxAnimatedVector2fVariableData dynamics)
+    : VfxVector2DynamicsBase
 {
-    public List<Vector2> Values { get; set; } = [.. dynamics.Values];
-    public List<float> Times { get; set; } = [.. dynamics.Times];
+    public List<Vector2> Values { get; set; } =
+        dynamics.Values is null ? null : [.. dynamics.Values];
+    public List<float> Times { get; set; } = dynamics.Times is null ? null : [.. dynamics.Times];
     public List<VfxProbabilityTable> ProbabilityTables { get; set; } =
         dynamics
             .ProbabilityTables?.Select(probabilityTable => new VfxProbabilityTable(
