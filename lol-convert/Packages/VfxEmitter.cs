@@ -153,7 +153,7 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public float? Period { get; set; }
     public Vector3 PostRotateOrientationAxis { get; set; } = emitter.PostRotateOrientationAxis;
     public VfxPrimitiveBase Primitive { get; set; } =
-        emitter.Primitive is null ? null : new(emitter.Primitive);
+        emitter.Primitive is null ? null : VfxPrimitiveBase.FromMeta(emitter.Primitive);
 }
 
 internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaErosion) { }
@@ -184,7 +184,7 @@ internal class VfxPalette(MetaClass.VfxPaletteDefinitionData palette) { }
 
 [JsonDerivedType(typeof(VfxPrimitiveArbitraryQuad), "arbitrary_quad")]
 [JsonDerivedType(typeof(VfxPrimitiveBeam), "beam")]
-[JsonDerivedType(typeof(VfxPrimitiveCameraSegmentedBeam), "camera_segmented_beam")]
+[JsonDerivedType(typeof(VfxPrimitiveCameraSegmentBeam), "camera_segment_beam")]
 [JsonDerivedType(typeof(VfxPrimitiveCameraQuad), "camera_quad")]
 [JsonDerivedType(typeof(VfxPrimitiveCameraUnitQuad), "camera_unit_quad")]
 [JsonDerivedType(typeof(VfxPrimitiveAttachedMesh), "attached_mesh")]
@@ -196,6 +196,24 @@ internal class VfxPalette(MetaClass.VfxPaletteDefinitionData palette) { }
 internal class VfxPrimitiveBase
 {
     public VfxPrimitiveBase(MetaClass.VfxPrimitiveBase primitive) { }
+
+    public static VfxPrimitiveBase FromMeta(MetaClass.VfxPrimitiveBase primitive) =>
+        primitive switch
+        {
+            MetaClass.VfxPrimitiveArbitraryQuad x => new VfxPrimitiveArbitraryQuad(x),
+            MetaClass.VfxPrimitiveBeam x => new VfxPrimitiveBeam(x),
+            MetaClass.VfxPrimitiveCameraSegmentBeam x => new VfxPrimitiveCameraSegmentBeam(x),
+            MetaClass.VfxPrimitiveCameraQuad x => new VfxPrimitiveCameraQuad(x),
+            MetaClass.VfxPrimitiveCameraUnitQuad x => new VfxPrimitiveCameraUnitQuad(x),
+            MetaClass.VfxPrimitiveAttachedMesh x => new VfxPrimitiveAttachedMesh(x),
+            MetaClass.VfxPrimitiveMesh x => new VfxPrimitiveMesh(x),
+            MetaClass.VfxPrimitivePlanarProjection x => new VfxPrimitivePlanarProjection(x),
+            MetaClass.VfxPrimitiveRay x => new VfxPrimitiveRay(x),
+            MetaClass.VfxPrimitiveArbitraryTrail x => new VfxPrimitiveArbitraryTrail(x),
+            MetaClass.VfxPrimitiveCameraTrail x => new VfxPrimitiveCameraTrail(x),
+            null => null,
+            _ => throw new NotImplementedException("Unknown primitive")
+        };
 }
 
 internal class VfxPrimitiveArbitraryQuad(MetaClass.VfxPrimitiveArbitraryQuad primitive)
@@ -212,7 +230,7 @@ internal class VfxPrimitiveBeamBase(MetaClass.VfxPrimitiveBeamBase beam) : VfxPr
     public VfxBeam Beam { get; set; } = beam.Beam is null ? null : new(beam.Beam);
 }
 
-internal class VfxPrimitiveCameraSegmentedBeam(MetaClass.VfxPrimitiveBeamBase beam)
+internal class VfxPrimitiveCameraSegmentBeam(MetaClass.VfxPrimitiveBeamBase beam)
     : VfxPrimitiveBeamBase(beam) { }
 
 internal class VfxPrimitiveCameraQuad(MetaClass.VfxPrimitiveCameraQuad primitive)
