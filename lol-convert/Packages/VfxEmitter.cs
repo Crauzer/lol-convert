@@ -184,6 +184,15 @@ internal class VfxPalette(MetaClass.VfxPaletteDefinitionData palette) { }
 
 [JsonDerivedType(typeof(VfxPrimitiveArbitraryQuad), "arbitrary_quad")]
 [JsonDerivedType(typeof(VfxPrimitiveBeam), "beam")]
+[JsonDerivedType(typeof(VfxPrimitiveCameraSegmentedBeam), "camera_segmented_beam")]
+[JsonDerivedType(typeof(VfxPrimitiveCameraQuad), "camera_quad")]
+[JsonDerivedType(typeof(VfxPrimitiveCameraUnitQuad), "camera_unit_quad")]
+[JsonDerivedType(typeof(VfxPrimitiveAttachedMesh), "attached_mesh")]
+[JsonDerivedType(typeof(VfxPrimitiveMesh), "mesh")]
+[JsonDerivedType(typeof(VfxPrimitivePlanarProjection), "planar_projection")]
+[JsonDerivedType(typeof(VfxPrimitiveRay), "ray")]
+[JsonDerivedType(typeof(VfxPrimitiveArbitraryTrail), "arbitrary_trail")]
+[JsonDerivedType(typeof(VfxPrimitiveCameraTrail), "camera_trail")]
 internal class VfxPrimitiveBase
 {
     public VfxPrimitiveBase(MetaClass.VfxPrimitiveBase primitive) { }
@@ -196,6 +205,62 @@ internal class VfxPrimitiveBeam(MetaClass.VfxPrimitiveBeam primitive) : VfxPrimi
 {
     public VfxBeam Beam { get; set; } = primitive.Beam is null ? null : new(primitive.Beam);
     public VfxMesh Mesh { get; set; } = primitive.Mesh is null ? null : new(primitive.Mesh);
+}
+
+internal class VfxPrimitiveBeamBase(MetaClass.VfxPrimitiveBeamBase beam) : VfxPrimitiveBase(beam)
+{
+    public VfxBeam Beam { get; set; } = beam.Beam is null ? null : new(beam.Beam);
+}
+
+internal class VfxPrimitiveCameraSegmentedBeam(MetaClass.VfxPrimitiveBeamBase beam)
+    : VfxPrimitiveBeamBase(beam) { }
+
+internal class VfxPrimitiveCameraQuad(MetaClass.VfxPrimitiveCameraQuad primitive)
+    : VfxPrimitiveBase(primitive) { }
+
+internal class VfxPrimitiveCameraUnitQuad(MetaClass.VfxPrimitiveCameraUnitQuad primitive)
+    : VfxPrimitiveBase(primitive) { }
+
+internal class VfxPrimitiveProjectionBase(MetaClass.VfxPrimitiveProjectionBase projection)
+    : VfxPrimitiveBase(projection)
+{
+    public VfxProjection Projection { get; set; } =
+        projection.Projection is null ? null : new(projection.Projection);
+}
+
+internal class VfxPrimitivePlanarProjection(MetaClass.VfxPrimitivePlanarProjection planarProjection)
+    : VfxPrimitiveProjectionBase(planarProjection) { }
+
+internal class VfxProjection(MetaClass.VfxProjectionDefinitionData projection)
+{
+    public VfxColor ColorModulate { get; set; } =
+        projection.ColorModulate is null ? null : new(projection.ColorModulate);
+    public float Fading { get; set; } = projection.Fading;
+    public float YRange { get; set; } = projection.YRange;
+}
+
+internal class VfxPrimitiveRay(MetaClass.VfxPrimitiveRay ray) : VfxPrimitiveBase(ray) { }
+
+internal class VfxPrimitiveTrailBase(MetaClass.VfxPrimitiveTrailBase trail)
+    : VfxPrimitiveBase(trail)
+{
+    public VfxTrail Trail { get; set; } = trail.Trail is null ? null : new(trail.Trail);
+}
+
+internal class VfxPrimitiveArbitraryTrail(MetaClass.VfxPrimitiveArbitraryTrail trail)
+    : VfxPrimitiveTrailBase(trail) { }
+
+internal class VfxPrimitiveCameraTrail(MetaClass.VfxPrimitiveCameraTrail trail)
+    : VfxPrimitiveTrailBase(trail) { }
+
+internal class VfxTrail(MetaClass.VfxTrailDefinitionData trail)
+{
+    public VfxVector3 BirthTilingSize { get; set; } =
+        trail.BirthTilingSize is null ? null : new(trail.BirthTilingSize);
+    public float Cutoff { get; set; } = trail.Cutoff;
+    public int MaxAddedPerFrame { get; set; } = trail.MaxAddedPerFrame;
+    public byte Mode { get; set; } = trail.Mode;
+    public byte SmoothingMode { get; set; } = trail.SmoothingMode;
 }
 
 internal class VfxBeam(MetaClass.VfxBeamDefinitionData beam)
