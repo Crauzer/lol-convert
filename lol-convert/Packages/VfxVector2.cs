@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using lol_convert.Interfaces;
+using System.Numerics;
 using System.Text.Json.Serialization;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
@@ -10,7 +11,7 @@ internal class VfxFlexVector2(MetaClass.FlexValueVector2 flexVector)
     public VfxVector2 Value { get; set; } = flexVector.Value is null ? null : new(flexVector.Value);
 }
 
-internal class VfxVector2(MetaClass.ValueVector2 vector)
+internal class VfxVector2(MetaClass.ValueVector2 vector) 
 {
     public Vector2 ConstantValue { get; set; } = vector.ConstantValue;
     public VfxVector2DynamicsBase Dynamics { get; set; } =

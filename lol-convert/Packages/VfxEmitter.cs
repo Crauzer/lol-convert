@@ -154,6 +154,48 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public Vector3 PostRotateOrientationAxis { get; set; } = emitter.PostRotateOrientationAxis;
     public VfxPrimitiveBase Primitive { get; set; } =
         emitter.Primitive is null ? null : VfxPrimitiveBase.FromMeta(emitter.Primitive);
+    public VfxFloat Rate { get; set; } = emitter.Rate is null ? null : new(emitter.Rate);
+    public VfxVector2 RateByVelocityFunction { get; set; } =
+        emitter.RateByVelocityFunction is null ? null : new(emitter.RateByVelocityFunction);
+    public VfxReflection Reflection { get; set; } =
+        emitter.ReflectionDefinition is null ? null : new(emitter.ReflectionDefinition);
+    public byte RenderPhaseOverride { get; set; } = emitter.RenderPhaseOverride;
+    public VfxVector3 Rotation0 { get; set; } = emitter.Rotation0 is null ? null : new(emitter.Rotation0);
+    public Vector3 RotationOverride { get; set; } = emitter.RotationOverride;
+    public VfxVector3 Scale0 { get; set; } = emitter.Scale0 is null ? null : new(emitter.Scale0);
+    public Vector3 ScaleOverride { get; set; } = emitter.ScaleOverride;
+    public float SliceTechniqueRange { get; set; } = emitter.SliceTechniqueRange;
+    public VfxSoftParticle SoftParticleParams { get; set; } =
+        emitter.SoftParticleParams is null ? null : new(emitter.SoftParticleParams);
+    public bool SortEmittersByPos { get; set; } = emitter.SortEmittersByPos;
+    public VfxShapeBase SpawnShape { get; set; } =
+        emitter.SpawnShape is null ? null : new(emitter.SpawnShape);
+    public ushort StartFrame { get; set; } = emitter.StartFrame;
+    public byte StencilMode { get; set; } = emitter.StencilMode;
+    public byte StencilRef { get; set; } = emitter.StencilRef;
+    public uint StencilReferenceId { get; set; } = emitter.StencilReferenceId;
+    public byte TexAddressModeBase { get; set; } = emitter.TexAddressModeBase;
+    public Vector2 TexDiv { get; set; } = emitter.TexDiv;
+    public string Texture { get; set; } = emitter.Texture;
+    public bool TextureFlipU { get; set; } = emitter.TextureFlipU;
+    public bool TextureFlipV { get; set; } = emitter.TextureFlipV;
+    public VfxTextureMult TextureMult { get; set; } =
+        emitter.TextureMult is null ? null : new(emitter.TextureMult);
+    public float? TimeActiveDuringPeriod { get; set; } = emitter.TimeActiveDuringPeriod;
+    public float TimeBeforeFirstEmission { get; set; } = emitter.TimeBeforeFirstEmission;
+    public Vector3 TranslationOverride { get; set; } = emitter.TranslationOverride;
+    public bool UseEmissionMeshNormalForBirth { get; set; } = emitter.UseEmissionMeshNormalForBirth;
+    public bool UseNavmeshMask { get; set; } = emitter.UseNavmeshMask;
+    public byte UvMode { get; set; } = emitter.UvMode;
+    public float UvParallaxScale { get; set; } = emitter.UvParallaxScale;
+    public VfxFloat UvRotation { get; set; } = emitter.UvRotation is null ? null : new(emitter.UvRotation);
+    public VfxVector2 UvScale { get; set; } = emitter.UvScale is null ? null : new(emitter.UvScale);
+    public bool UvScrollClamp { get; set; } = emitter.UvScrollClamp;
+    public Vector2 UvTransformCenter { get; set; } = emitter.UvTransformCenter;
+    public VfxVector3 Velocity { get; set; } = emitter.Velocity is null ? null : new(emitter.Velocity);
+    public VfxVector3 WorldAcceleration { get; set; } =
+        emitter.WorldAcceleration is null ? null : new(emitter.WorldAcceleration);
+    public bool WriteAlphaOnly { get; set; } = emitter.WriteAlphaOnly;
 }
 
 internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaErosion) { }
@@ -179,6 +221,27 @@ internal class VfxLegacySimple(MetaClass.VfxEmitterLegacySimple legacySimple) { 
 internal class VfxLinger(MetaClass.VfxLingerDefinitionData linger) { }
 
 internal class VfxMaterialOverride(MetaClass.VfxMaterialOverrideDefinitionData materialOverride) { }
+
+internal class VfxTextureMult(MetaClass.VfxTextureMultDefinitionData textureMult) { }
+
+internal class VfxReflection(MetaClass.VfxReflectionDefinitionData reflection) 
+{
+    public float Fresnel { get; set; } = reflection.Fresnel;
+    public Vector4 FresnelColor { get; set; } = reflection.FresnelColor;
+    public float ReflectionFresnel { get; set; } = reflection.ReflectionFresnel;
+    public Vector4 ReflectionFresnelColor { get; set; } = reflection.ReflectionFresnelColor;
+    public string ReflectionMapTexture { get; set; } = reflection.ReflectionMapTexture;
+    public float ReflectionOpacityDirect { get; set; } = reflection.ReflectionOpacityDirect;
+    public float ReflectionOpacityGlancing { get; set; } = reflection.ReflectionOpacityGlancing;
+}
+
+internal class VfxSoftParticle(MetaClass.VfxSoftParticleDefinitionData softParticle) 
+{
+    public float BeginIn { get; set; } = softParticle.BeginIn;
+    public float BeginOut { get; set; } = softParticle.BeginOut;
+    public float DeltaIn { get; set; } = softParticle.DeltaIn;
+    public float DeltaOut { get; set; } = softParticle.DeltaOut;
+}
 
 internal class VfxPalette(MetaClass.VfxPaletteDefinitionData palette) { }
 

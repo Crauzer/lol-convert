@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using lol_convert.Interfaces;
+using System.Numerics;
 using System.Text.Json.Serialization;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
