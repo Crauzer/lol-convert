@@ -160,7 +160,8 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public VfxReflection Reflection { get; set; } =
         emitter.ReflectionDefinition is null ? null : new(emitter.ReflectionDefinition);
     public byte RenderPhaseOverride { get; set; } = emitter.RenderPhaseOverride;
-    public VfxVector3 Rotation0 { get; set; } = emitter.Rotation0 is null ? null : new(emitter.Rotation0);
+    public VfxVector3 Rotation0 { get; set; } =
+        emitter.Rotation0 is null ? null : new(emitter.Rotation0);
     public Vector3 RotationOverride { get; set; } = emitter.RotationOverride;
     public VfxVector3 Scale0 { get; set; } = emitter.Scale0 is null ? null : new(emitter.Scale0);
     public Vector3 ScaleOverride { get; set; } = emitter.ScaleOverride;
@@ -188,17 +189,38 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public bool UseNavmeshMask { get; set; } = emitter.UseNavmeshMask;
     public byte UvMode { get; set; } = emitter.UvMode;
     public float UvParallaxScale { get; set; } = emitter.UvParallaxScale;
-    public VfxFloat UvRotation { get; set; } = emitter.UvRotation is null ? null : new(emitter.UvRotation);
+    public VfxFloat UvRotation { get; set; } =
+        emitter.UvRotation is null ? null : new(emitter.UvRotation);
     public VfxVector2 UvScale { get; set; } = emitter.UvScale is null ? null : new(emitter.UvScale);
     public bool UvScrollClamp { get; set; } = emitter.UvScrollClamp;
     public Vector2 UvTransformCenter { get; set; } = emitter.UvTransformCenter;
-    public VfxVector3 Velocity { get; set; } = emitter.Velocity is null ? null : new(emitter.Velocity);
+    public VfxVector3 Velocity { get; set; } =
+        emitter.Velocity is null ? null : new(emitter.Velocity);
     public VfxVector3 WorldAcceleration { get; set; } =
         emitter.WorldAcceleration is null ? null : new(emitter.WorldAcceleration);
     public bool WriteAlphaOnly { get; set; } = emitter.WriteAlphaOnly;
 }
 
-internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaErosion) { }
+internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaErosion)
+{
+    public VfxFloat ErosionDriveCurve { get; set; } =
+        alphaErosion.ErosionDriveCurve is null ? null : new(alphaErosion.ErosionDriveCurve);
+    public byte ErosionDriveSource { get; set; } = alphaErosion.ErosionDriveSource;
+    public float ErosionFeatherIn { get; set; } = alphaErosion.ErosionFeatherIn;
+    public float ErosionFeatherOut { get; set; } = alphaErosion.ErosionFeatherOut;
+    public byte ErosionMapAddressMode { get; set; } = alphaErosion.ErosionMapAddressMode;
+    public VfxColor ErosionMapChannelMixer { get; set; } =
+        alphaErosion.ErosionMapChannelMixer is null
+            ? null
+            : new(alphaErosion.ErosionMapChannelMixer);
+    public string ErosionMapName { get; set; } = alphaErosion.ErosionMapName;
+    public float ErosionSliceWidth { get; set; } = alphaErosion.ErosionSliceWidth;
+    public VfxFloat LingerErosionDriveCurve { get; set; } =
+        alphaErosion.LingerErosionDriveCurve is null
+            ? null
+            : new(alphaErosion.LingerErosionDriveCurve);
+    public bool UseLingerErosionDriveCurve { get; set; } = alphaErosion.UseLingerErosionDriveCurve;
+}
 
 internal class VfxEmitterAudio(MetaClass.VfxEmitterAudio emitterAudio) { }
 
@@ -224,7 +246,7 @@ internal class VfxMaterialOverride(MetaClass.VfxMaterialOverrideDefinitionData m
 
 internal class VfxTextureMult(MetaClass.VfxTextureMultDefinitionData textureMult) { }
 
-internal class VfxReflection(MetaClass.VfxReflectionDefinitionData reflection) 
+internal class VfxReflection(MetaClass.VfxReflectionDefinitionData reflection)
 {
     public float Fresnel { get; set; } = reflection.Fresnel;
     public Vector4 FresnelColor { get; set; } = reflection.FresnelColor;
@@ -235,7 +257,7 @@ internal class VfxReflection(MetaClass.VfxReflectionDefinitionData reflection)
     public float ReflectionOpacityGlancing { get; set; } = reflection.ReflectionOpacityGlancing;
 }
 
-internal class VfxSoftParticle(MetaClass.VfxSoftParticleDefinitionData softParticle) 
+internal class VfxSoftParticle(MetaClass.VfxSoftParticleDefinitionData softParticle)
 {
     public float BeginIn { get; set; } = softParticle.BeginIn;
     public float BeginOut { get; set; } = softParticle.BeginOut;
