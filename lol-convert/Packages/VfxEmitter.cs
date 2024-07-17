@@ -222,7 +222,11 @@ internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaEros
     public bool UseLingerErosionDriveCurve { get; set; } = alphaErosion.UseLingerErosionDriveCurve;
 }
 
-internal class VfxEmitterAudio(MetaClass.VfxEmitterAudio emitterAudio) { }
+internal class VfxEmitterAudio(MetaClass.VfxEmitterAudio emitterAudio) 
+{
+    public string SoundOnCreate { get; set; } = emitterAudio.SoundOnCreate;
+    public string SoundPersistent { get; set; } = emitterAudio.SoundPersistent;
+}
 
 internal class VfxChildParticleSet(MetaClass.VfxChildParticleSetDefinitionData childParticleSet) { }
 
