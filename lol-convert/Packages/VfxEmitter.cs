@@ -222,13 +222,47 @@ internal class VfxAlphaErosion(MetaClass.VfxAlphaErosionDefinitionData alphaEros
     public bool UseLingerErosionDriveCurve { get; set; } = alphaErosion.UseLingerErosionDriveCurve;
 }
 
-internal class VfxEmitterAudio(MetaClass.VfxEmitterAudio emitterAudio) 
+internal class VfxEmitterAudio(MetaClass.VfxEmitterAudio emitterAudio)
 {
     public string SoundOnCreate { get; set; } = emitterAudio.SoundOnCreate;
     public string SoundPersistent { get; set; } = emitterAudio.SoundPersistent;
 }
 
-internal class VfxChildParticleSet(MetaClass.VfxChildParticleSetDefinitionData childParticleSet) { }
+internal class VfxChildParticleSet(MetaClass.VfxChildParticleSetDefinitionData childParticleSet)
+{
+    public List<string> BoneToSpawnAt { get; set; } = childParticleSet.BoneToSpawnAt?.ToList();
+    public bool ChildEmitOnDeath { get; set; } = childParticleSet.ChildEmitOnDeath;
+    public List<VfxChildIdentifier> ChildrenIdentifiers { get; set; } =
+        childParticleSet.ChildrenIdentifiers?.Select(x => new VfxChildIdentifier(x)).ToList();
+    public VfxFloat ChildrenProbability { get; set; } =
+        childParticleSet.ChildrenProbability is null
+            ? null
+            : new(childParticleSet.ChildrenProbability);
+    public VfxParentInheritanceParams ParentInheritance { get; set; } =
+        childParticleSet.ParentInheritanceDefinition is null
+            ? null
+            : new(childParticleSet.ParentInheritanceDefinition);
+}
+
+internal class VfxChildIdentifier(MetaClass.VfxChildIdentifier childIdentifier)
+{
+    public string Effect { get; set; } =
+        BinHashtableService.TryResolveObjectLink(childIdentifier.Effect);
+    public string EffectKey { get; set; } =
+        BinHashtableService.TryResolveHash(childIdentifier.EffectKey);
+    public string EffectName { get; set; } = childIdentifier.EffectName;
+}
+
+internal class VfxParentInheritanceParams(
+    MetaClass.VfxParentInheritanceParams parentInheritanceParams
+)
+{
+    public byte Mode { get; set; } = parentInheritanceParams.Mode;
+    public VfxVector3 RelativeOffset { get; set; } =
+        parentInheritanceParams.RelativeOffset is null
+            ? null
+            : new(parentInheritanceParams.RelativeOffset);
+}
 
 internal class VfxMaterial(MetaClass.VfxMaterialDefinitionData material) { }
 
