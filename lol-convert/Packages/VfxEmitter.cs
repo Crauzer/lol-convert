@@ -280,8 +280,6 @@ internal class VfxLegacySimple(MetaClass.VfxEmitterLegacySimple legacySimple) { 
 
 internal class VfxLinger(MetaClass.VfxLingerDefinitionData linger) { }
 
-internal class VfxTextureMult(MetaClass.VfxTextureMultDefinitionData textureMult) { }
-
 internal class VfxReflection(MetaClass.VfxReflectionDefinitionData reflection)
 {
     public float Fresnel { get; set; } = reflection.Fresnel;

@@ -33,9 +33,7 @@ public class SkinMeshMaterialOverridePackage(
 )
 {
     public string Material { get; set; } =
-        materialOverride.Material != 0
-            ? BinHashtableService.ResolveObjectLink(materialOverride.Material)
-            : null;
+        BinHashtableService.TryResolveObjectLink(materialOverride.Material);
     public string Submesh { get; set; } = materialOverride.Submesh;
     public string Texture { get; set; } = materialOverride.Texture;
 }
