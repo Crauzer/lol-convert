@@ -14,7 +14,7 @@ public sealed class ChampionPackage
     public List<string> SkinNames { get; set; }
 }
 
-public sealed class ChampionSkinPackage
+internal sealed class ChampionSkinPackage
 {
     public string Name { get; set; }
     public string DisplayName { get; set; }
@@ -26,6 +26,8 @@ public sealed class ChampionSkinPackage
     public string Texture { get; set; }
     public List<SkinMeshMaterialOverridePackage> MaterialOverrides { get; set; }
     public List<StaticMaterialPackage> Materials { get; set; }
+    public Dictionary<string, VfxSystem> VfxSystems { get; set; }
+    public Dictionary<string, string> ResourceResolver { get; set; }
 }
 
 public class SkinMeshMaterialOverridePackage(

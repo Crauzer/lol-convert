@@ -7,7 +7,6 @@ using LeagueToolkit.Core.Wad;
 using LeagueToolkit.Hashing;
 using LeagueToolkit.IO.SimpleSkinFile;
 using LeagueToolkit.Meta;
-using LeagueToolkit.Meta.Classes;
 using lol_convert.Meta;
 using lol_convert.Packages;
 using lol_convert.Services;
@@ -174,6 +173,12 @@ internal class ChampionConverter
 
         var binObjectContainer = BinObjectContainer.FromPropertyBin(bin, wad);
         var staticMaterials = CreateChampionSkinMaterials(binObjectContainer.Objects.Values);
+        var vfxSystems = CreateVfxSystems(binObjectContainer.Objects.Values);
+        var resourceResolver = CreateResourceResolver(
+            binObjectContainer.Objects.Values,
+            championName,
+            skinName
+        );
 
         ChampionSkinPackage skin =
             new()
@@ -181,16 +186,18 @@ internal class ChampionConverter
                 Name = skinName,
                 DisplayName = "TODO",
                 SkinMeshPath = meshAssetPath,
-                Materials = staticMaterials
+                Materials = staticMaterials,
+                VfxSystems = vfxSystems,
+                ResourceResolver = resourceResolver
             };
 
-        var skinProperties = MetaSerializer.Deserialize<SkinCharacterDataProperties>(
+        var skinProperties = MetaSerializer.Deserialize<MetaClass.SkinCharacterDataProperties>(
             MetaEnvironmentService.Environment,
             bin.Objects[Fnv1a.HashLower(skinPropertiesObjectPath)]
         );
         if (
             skinProperties.SkinMeshProperties?.Value
-            is not SkinMeshDataProperties skinMeshProperties
+            is not MetaClass.SkinMeshDataProperties skinMeshProperties
         )
         {
             throw new NullReferenceException("SkinMeshProperties does not exist");
@@ -223,15 +230,15 @@ internal class ChampionConverter
         List<StaticMaterialPackage> materialPackages = [];
 
         var staticMaterialObjects = binObjects.Where(binObject =>
-            binObject.ClassHash == Fnv1a.HashLower(nameof(StaticMaterialDef))
+            binObject.ClassHash == Fnv1a.HashLower(nameof(MetaClass.StaticMaterialDef))
         );
 
         foreach (var staticMaterialObject in staticMaterialObjects)
         {
-            StaticMaterialDef staticMaterialDef = null;
+            MetaClass.StaticMaterialDef staticMaterialDef = null;
             try
             {
-                staticMaterialDef = MetaSerializer.Deserialize<StaticMaterialDef>(
+                staticMaterialDef = MetaSerializer.Deserialize<MetaClass.StaticMaterialDef>(
                     _metaEnvironment,
                     staticMaterialObject
                 );
@@ -240,8 +247,8 @@ internal class ChampionConverter
             {
                 Log.Error(
                     ex,
-                    "Failed to deserialize static material object (objectHash: {objectHash})",
-                    staticMaterialObject.PathHash
+                    "Failed to deserialize static material object (object: {object})",
+                    BinHashtableService.TryResolveObjectLink(staticMaterialObject.PathHash)
                 );
             }
 
@@ -249,6 +256,87 @@ internal class ChampionConverter
         }
 
         return materialPackages;
+    }
+
+    public Dictionary<string, VfxSystem> CreateVfxSystems(IEnumerable<BinTreeObject> binObjects)
+    {
+        Dictionary<string, VfxSystem> vfxSystems = [];
+
+        var vfxSystemObjects = binObjects.Where(binObject =>
+            binObject.ClassHash == Fnv1a.HashLower(nameof(MetaClass.VfxSystemDefinitionData))
+        );
+        foreach (var vfxSystemObject in vfxSystemObjects)
+        {
+            MetaClass.VfxSystemDefinitionData vfxSystemDefinitionData = null;
+            try
+            {
+                vfxSystemDefinitionData =
+                    MetaSerializer.Deserialize<MetaClass.VfxSystemDefinitionData>(
+                        _metaEnvironment,
+                        vfxSystemObject
+                    );
+            }
+            catch (Exception ex)
+            {
+                Log.Error(
+                    ex,
+                    "Failed to deserialize Vfx System object (object: {object})",
+                    BinHashtableService.ResolveObjectLink(vfxSystemObject.PathHash)
+                );
+            }
+
+            vfxSystems.Add(
+                BinHashtableService.ResolveObjectLink(vfxSystemObject.PathHash),
+                new(vfxSystemDefinitionData)
+            );
+        }
+
+        return vfxSystems;
+    }
+
+    public Dictionary<string, string> CreateResourceResolver(
+        IEnumerable<BinTreeObject> binObjects,
+        string character,
+        string skin
+    )
+    {
+        var resourceResolvers = binObjects
+            .Where(binObject =>
+                binObject.ClassHash == Fnv1a.HashLower(nameof(MetaClass.ResourceResolver))
+            )
+            .ToArray();
+
+        if (resourceResolvers.Length == 0)
+        {
+            Log.Warning(
+                "No resource resolvers found (character: {character}, skin: {skin})",
+                character,
+                skin
+            );
+            return null;
+        }
+
+        if (resourceResolvers.Length > 1)
+        {
+            Log.Warning(
+                "Multiple resource resolvers found (character: {character}, skin: {skin})",
+                character,
+                skin
+            );
+            return null;
+        }
+
+        var resourceResolver = MetaSerializer.Deserialize<MetaClass.ResourceResolver>(
+            MetaEnvironmentService.Environment,
+            resourceResolvers[0]
+        );
+
+        return resourceResolver
+            .ResourceMap.Select(x => new KeyValuePair<string, string>(
+                BinHashtableService.TryResolveHash(x.Key),
+                BinHashtableService.TryResolveObjectLink(x.Value)
+            ))
+            .ToDictionary();
     }
 
     private static List<SkinMeshMaterialOverridePackage> CollectMaterialOverrides(
@@ -385,7 +473,7 @@ internal class ChampionConverter
 
         foreach (var clip in animationGraph.ClipDataMap.Values)
         {
-            if (clip is not AtomicClipData atomicClip)
+            if (clip is not MetaClass.AtomicClipData atomicClip)
             {
                 continue;
             }
