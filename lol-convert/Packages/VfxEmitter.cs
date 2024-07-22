@@ -264,8 +264,6 @@ internal class VfxParentInheritanceParams(
             : new(parentInheritanceParams.RelativeOffset);
 }
 
-internal class VfxMaterial(MetaClass.VfxMaterialDefinitionData material) { }
-
 internal class VfxDistortion(MetaClass.VfxDistortionDefinitionData distortion) { }
 
 internal class VfxEmissionSurface(MetaClass.VfxEmissionSurfaceData emissionSurface) { }
