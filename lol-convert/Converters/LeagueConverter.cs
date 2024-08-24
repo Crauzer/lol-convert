@@ -1,7 +1,12 @@
 ﻿using System.Reflection;
+using CommunityToolkit.HighPerformance;
+using LeagueToolkit.Core.Meta;
+using LeagueToolkit.Core.Wad;
+using LeagueToolkit.Hashing;
 using LeagueToolkit.Meta;
 using lol_convert.Packages;
 using lol_convert.Wad;
+using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Converters;
 
@@ -22,17 +27,16 @@ public sealed class LeagueConverter
         LeagueConverterOptions options
     )
     {
-        OutputPath = outputPath;
-        Options = options;
+        this.OutputPath = outputPath;
+        this.Options = options;
 
-        _hashtable = hashtable;
-        _metaEnvironment = MetaEnvironment.Create(
+        this._hashtable = hashtable;
+        this._metaEnvironment = MetaEnvironment.Create(
             Assembly.Load("LeagueToolkit.Meta.Classes").ExportedTypes.Where(x => x.IsClass)
         );
 
-        _championConverter = new(hashtable, _metaEnvironment, outputPath);
-        _mapConverter = new(hashtable, _metaEnvironment, outputPath);
-
+        this._championConverter = new(hashtable, _metaEnvironment, outputPath);
+        this._mapConverter = new(hashtable, _metaEnvironment, outputPath);
     }
 
     public LeaguePackage CreateLeaguePackage(string finalPath)
@@ -41,6 +45,31 @@ public sealed class LeagueConverter
         var championPackagePaths = _championConverter.CreateChampionPackages(finalPath);
 
         return new() { ChampionPackagePaths = championPackagePaths, Maps = maps };
+    }
+
+    private List<string> GetChampionsList(string finalPath)
+    {
+        var globalWad = new WadFile(Path.Join(finalPath, "Global.wad.client"));
+
+        using var championsBinStream = globalWad.LoadChunkDecompressed(
+            "global/champions/champions.bin"
+        );
+        var championsBin = new BinTree(championsBinStream.AsStream());
+
+        var championHash = Fnv1a.HashLower(nameof(MetaClass.Champion));
+        var championObjects = championsBin.Objects.Values.Where(x => x.ClassHash == championHash);
+        List<string> championNames = [];
+        foreach (var championObject in championObjects)
+        {
+            var champion = MetaSerializer.Deserialize<MetaClass.Champion>(
+                this._metaEnvironment,
+                championObject
+            );
+
+            championNames.Add(champion.Name);
+        }
+
+        return championNames;
     }
 }
 
