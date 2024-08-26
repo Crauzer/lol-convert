@@ -45,12 +45,10 @@ internal class ChampionConverter
             var championName = championWadName.ToLower().Remove(championWadName.IndexOf('.'));
 
             WadFile wad = new(File.OpenRead(championWadPath));
-            var chunkPaths = wad
-                .Chunks.Keys.Select(x => _wadHashtable.Resolve(x).ToLower())
-                .ToList();
+            var chunkPaths = Utils.WadUtils.ResolveWadChunkPaths(wad, _wadHashtable).ToList();
 
-            var championPackage = CreateChampionPackage(championName, wad, chunkPaths);
-            var championPackagePath = SaveChampionPackage(championPackage);
+            var championPackage = CreateCharacterPackage(championName, wad, chunkPaths);
+            var championPackagePath = SaveCharacterPackage(championPackage);
 
             championPackagePaths.Add(Path.GetRelativePath(_outputPath, championPackagePath));
         }
@@ -58,79 +56,83 @@ internal class ChampionConverter
         return championPackagePaths;
     }
 
-    private ChampionPackage CreateChampionPackage(
-        string championName,
+    private Character CreateCharacterPackage(
+        string characterName,
         WadFile wad,
         List<string> chunkPaths
     )
     {
-        var skins = CreateChampionSkins(championName, wad, chunkPaths);
+        var skins = CreateCharacterSkins(characterName, wad, chunkPaths);
         foreach (var skin in skins)
         {
             try
             {
-                SaveChampionSkinPackage(championName, skin);
+                SaveCharacterSkinPackage(characterName, skin);
             }
             catch (Exception e)
             {
                 Log.Error(
                     e,
-                    "Failed to save champion skin package (championName: {championName}, skinName: {skinName})",
-                    championName,
+                    "Failed to save character skin package (characterName: {characterName}, skinName: {skinName})",
+                    characterName,
                     skin.Name
                 );
             }
         }
 
-        return new() { Name = championName, SkinNames = skins.Select(x => x.Name).ToList() };
+        return new() { Name = characterName, SkinNames = skins.Select(x => x.Name).ToList() };
     }
 
-    private void SaveChampionSkinPackage(string championName, ChampionSkinPackage skin)
+    private static void SaveCharacterSkinPackage(string characterName, CharacterSkin skin)
     {
         Log.Information(
-            "Saving champion skin package (championName: {championName}, skinName: {skinName})",
-            championName,
+            "Saving character skin package (characterName: {characterName}, skinName: {skinName})",
+            characterName,
             skin.Name
         );
 
-        var championPackageDirectory = CreateChampionPackageDirectoryPath(championName);
-        var skinDirectory = Path.Join(championPackageDirectory, "skins", skin.Name);
-        var skinPackagePath = Path.Join(skinDirectory, $"{skin.Name}.json");
+        var skinDirectory = PathBuilder.CreateCharacterSkinDataDirectoryPath(
+            characterName,
+            skin.Name
+        );
+        var skinDataPath = PathBuilder.CreateCharacterSkinDataPath(characterName, skin.Name);
 
         Directory.CreateDirectory(skinDirectory);
-        using var skinStream = File.Create(skinPackagePath);
+        using var skinStream = File.Create(skinDataPath);
         JsonSerializer.Serialize(skinStream, skin, JsonUtils.DefaultOptions);
     }
 
-    public string SaveChampionPackage(ChampionPackage championPackage)
+    public static string SaveCharacterPackage(Character character)
     {
-        var championName = championPackage.Name.ToLower();
-        var championPackageDirectory = CreateChampionPackageDirectoryPath(championName);
-        var championPackagePath = Path.Join(championPackageDirectory, $"{championName}.json");
+        var characterName = character.Name.ToLower();
+        var dataDirectoryPath = PathBuilder.CreateCharacterDataDirectoryPath(characterName);
+        var dataPath = PathBuilder.CreateCharacterDataPath(characterName);
 
-        Directory.CreateDirectory(championPackageDirectory);
-        using var championPackageStream = File.Create(championPackagePath);
-        JsonSerializer.Serialize(championPackageStream, championPackage, JsonUtils.DefaultOptions);
+        Directory.CreateDirectory(dataDirectoryPath);
+        using var championPackageStream = File.Create(dataPath);
+        JsonSerializer.Serialize(championPackageStream, character, JsonUtils.DefaultOptions);
 
-        return championPackagePath;
+        return dataPath;
     }
 
-    private List<ChampionSkinPackage> CreateChampionSkins(
-        string championName,
+    private List<CharacterSkin> CreateCharacterSkins(
+        string characterName,
         WadFile wad,
         List<string> chunkPaths
     )
     {
-        var skinBinPaths = ConvertUtils.GlobChampionSkinBinPaths(championName, chunkPaths).ToList();
-        List<ChampionSkinPackage> skins = new(skinBinPaths.Count);
+        var skinBinPaths = ConvertUtils
+            .GlobCharacterSkinBinPaths(characterName, chunkPaths)
+            .ToList();
+        List<CharacterSkin> skins = new(skinBinPaths.Count);
         foreach (string skinBinPath in skinBinPaths)
         {
             string skinName = Path.GetFileNameWithoutExtension(skinBinPath);
             if (skinName == "root")
             {
                 Log.Verbose(
-                    "Skipping root champion skin package (championName: {championName})",
-                    championName,
+                    "Skipping root character skin package (characterName: {characterName})",
+                    characterName,
                     skinName
                 );
                 continue;
@@ -138,8 +140,8 @@ internal class ChampionConverter
 
             try
             {
-                var skin = CreateChampionSkin(
-                    championName,
+                var skin = CreateCharacterSkin(
+                    characterName,
                     skinName,
                     new(wad.LoadChunkDecompressed(skinBinPath).AsStream()),
                     wad
@@ -150,8 +152,8 @@ internal class ChampionConverter
             {
                 Log.Error(
                     e,
-                    "Failed to create champion skin package (championName: {championName}, skinName: {skinName})",
-                    championName,
+                    "Failed to create character skin package (characterName: {characterName}, skinName: {skinName})",
+                    characterName,
                     skinName
                 );
             }
@@ -160,27 +162,27 @@ internal class ChampionConverter
         return skins;
     }
 
-    private ChampionSkinPackage CreateChampionSkin(
-        string championName,
+    private CharacterSkin CreateCharacterSkin(
+        string characterName,
         string skinName,
         BinTree bin,
         WadFile wad
     )
     {
-        string skinPropertiesObjectPath = $"characters/{championName}/skins/{skinName}";
+        string skinPropertiesObjectPath = $"characters/{characterName}/skins/{skinName}";
         string meshAssetPath =
-            $"assets/characters/{championName}/skins/{skinName}/{championName}_{skinName}.glb";
+            $"assets/characters/{characterName}/skins/{skinName}/{characterName}_{skinName}.glb";
 
         var binObjectContainer = BinObjectContainer.FromPropertyBin(bin, wad);
-        var staticMaterials = CreateChampionSkinMaterials(binObjectContainer.Objects.Values);
+        var staticMaterials = CreateCharacterSkinMaterials(binObjectContainer.Objects.Values);
         var vfxSystems = CreateVfxSystems(binObjectContainer.Objects.Values);
         var resourceResolver = CreateResourceResolver(
             binObjectContainer.Objects.Values,
-            championName,
+            characterName,
             skinName
         );
 
-        ChampionSkinPackage skin =
+        CharacterSkin skin =
             new()
             {
                 Name = skinName,
@@ -211,8 +213,8 @@ internal class ChampionConverter
         skin.Texture = skinMeshProperties.Texture;
         skin.MaterialOverrides = CollectMaterialOverrides(skinMeshProperties);
 
-        ProduceChampionSkinMesh(
-            championName,
+        ProduceCharacterSkinMesh(
+            characterName,
             skinName,
             meshAssetPath,
             skinProperties,
@@ -223,7 +225,7 @@ internal class ChampionConverter
         return skin;
     }
 
-    private List<StaticMaterialPackage> CreateChampionSkinMaterials(
+    private List<StaticMaterialPackage> CreateCharacterSkinMaterials(
         IEnumerable<BinTreeObject> binObjects
     )
     {
@@ -348,8 +350,8 @@ internal class ChampionConverter
             ))
             .ToList() ?? [];
 
-    private void ProduceChampionSkinMesh(
-        string championName,
+    private void ProduceCharacterSkinMesh(
+        string character,
         string skinName,
         string meshAssetPath,
         MetaClass.SkinCharacterDataProperties skinCharacterProperties,
@@ -371,7 +373,7 @@ internal class ChampionConverter
         );
 
         var animationGraphData = ResolveAnimationGraphData(
-            championName,
+            character,
             skinName,
             skinCharacterProperties,
             binObjectContainer
@@ -386,7 +388,7 @@ internal class ChampionConverter
     }
 
     private AnimationGraphPackage CreateAnimationGraph(
-        string championName,
+        string characterName,
         string skinName,
         MetaClass.SkinCharacterDataProperties skinCharacterProperties,
         BinObjectContainer binObjectContainer
@@ -398,8 +400,8 @@ internal class ChampionConverter
         )
         {
             Log.Warning(
-                "{championName} - {skinName} does not have an animation graph data link",
-                championName,
+                "{characterName} - {skinName} does not have an animation graph data link",
+                characterName,
                 skinName
             );
             return new();
@@ -445,7 +447,7 @@ internal class ChampionConverter
     }
 
     private MetaClass.AnimationGraphData ResolveAnimationGraphData(
-        string championName,
+        string characterName,
         string skinName,
         MetaClass.SkinCharacterDataProperties skinCharacterProperties,
         BinObjectContainer binObjectContainer
@@ -482,10 +484,5 @@ internal class ChampionConverter
         }
 
         return paths;
-    }
-
-    private string CreateChampionPackageDirectoryPath(string championName)
-    {
-        return Path.Join(_outputPath, "data", "characters", championName);
     }
 }

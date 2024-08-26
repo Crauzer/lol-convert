@@ -18,18 +18,21 @@ public sealed partial class ConvertUtils
     [GeneratedRegex(@"^Map[\d]+\.wad\.client")]
     private static partial Regex MapWadClientRegex();
 
+    [GeneratedRegex(@"^TFTSet[\d\w]+\.wad\.client")]
+    private static partial Regex TftSetRegex();
+
     public static IEnumerable<string> GlobChampionWads(string finalPath) =>
         Directory
             .EnumerateFiles(Path.Join(finalPath, CHAMPIONS_PATH))
             .Where(path => WadClientRegex().IsMatch(Path.GetFileName(path)));
 
-    public static IEnumerable<string> GlobChampionSkinBinPaths(
-        string championName,
+    public static IEnumerable<string> GlobCharacterSkinBinPaths(
+        string characterName,
         IEnumerable<string> chunkPaths
     ) =>
         chunkPaths.Where(chunkPath =>
             chunkPath.StartsWith(
-                $"data/characters/{championName}/skins/",
+                $"data/characters/{characterName}/skins/",
                 StringComparison.OrdinalIgnoreCase
             )
         );
@@ -38,4 +41,9 @@ public sealed partial class ConvertUtils
         Directory
             .EnumerateFiles(Path.Join(finalPath, MAPS_PATH))
             .Where(path => MapWadClientRegex().IsMatch(Path.GetFileName(path)));
+
+    public static IEnumerable<string> GlobTftSets(string finalPath) =>
+        Directory
+            .EnumerateFiles(finalPath)
+            .Where(path => TftSetRegex().IsMatch(Path.GetFileName(path)));
 }

@@ -2,6 +2,27 @@
 
 internal static class PathBuilder
 {
+    // -------- Character --------
+
+    public static string CreateCharacterDataDirectoryPath(string characterName) =>
+        Path.Combine("data", "characters", characterName);
+
+    public static string CreateCharacterDataPath(string characterName) =>
+        Path.Combine(CreateCharacterDataDirectoryPath(characterName), $"{characterName}.json");
+
+    public static string CreateCharacterSkinDataDirectoryPath(
+        string characterName,
+        string skinName
+    ) => Path.Combine(CreateCharacterDataDirectoryPath(characterName), "skins", skinName);
+
+    public static string CreateCharacterSkinDataPath(string characterName, string skinName) =>
+        Path.Combine(
+            CreateCharacterSkinDataDirectoryPath(characterName, skinName),
+            $"{skinName}.json"
+        );
+
+    // -------- Map --------
+
     public static DirectoryInfo CreateMapSkinAssetDirectory(string mapName, string skinName) =>
         Directory.CreateDirectory(Path.Combine("assets", "maps", mapName, "skins", skinName));
 
