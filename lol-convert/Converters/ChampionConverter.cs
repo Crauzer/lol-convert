@@ -35,7 +35,7 @@ internal class ChampionConverter
             var championName = championWadName.ToLower().Remove(championWadName.IndexOf('.'));
 
             WadFile wad = new(File.OpenRead(championWadPath));
-            var chunkPaths = Utils.WadUtils.ResolveWadChunkPaths(wad, _wadHashtable).ToList();
+            var chunkPaths = ConvertUtils.ResolveWadChunkPaths(wad, _wadHashtable).ToList();
 
             var championPackage = _characterConverter.CreateCharacterPackage(
                 championName,

@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using LeagueToolkit.Core.Wad;
+using lol_convert.Wad;
+using System.Text.RegularExpressions;
 
 namespace lol_convert;
 
@@ -47,4 +49,7 @@ public sealed partial class ConvertUtils
 
     public static IEnumerable<string> GlobTftCharacters(IEnumerable<string> chunkPaths) =>
         chunkPaths.Where(chunkPath => TftCharacterRegex().IsMatch(chunkPath));
+
+    public static IEnumerable<string> ResolveWadChunkPaths(WadFile wad, WadHashtable hashtable) =>
+        wad.Chunks.Keys.Select(chunk => hashtable.Resolve(chunk).ToLower());
 }

@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using CommunityToolkit.HighPerformance;
+﻿using CommunityToolkit.HighPerformance;
 using LeagueToolkit.Core.Animation;
 using LeagueToolkit.Core.Mesh;
 using LeagueToolkit.Core.Meta;
@@ -13,6 +12,7 @@ using lol_convert.Services;
 using lol_convert.Utils;
 using lol_convert.Wad;
 using Serilog;
+using System.Text.Json;
 using MetaClass = LeagueToolkit.Meta.Classes;
 using Skeleton = LeagueToolkit.Core.Animation.RigResource;
 
