@@ -42,7 +42,7 @@ internal class ChampionConverter
                 wad,
                 chunkPaths
             );
-            var championPackagePath = CharacterConverter.SaveCharacterPackage(championPackage);
+            var championPackagePath = _characterConverter.SaveCharacterPackage(championPackage);
 
             championPackagePaths.Add(Path.GetRelativePath(_outputPath, championPackagePath));
         }

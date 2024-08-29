@@ -46,8 +46,8 @@ public sealed class LeagueConverter
     {
         var championNames = GetChampionsList(finalPath).Order().ToList();
         var maps = _mapConverter.CreateMapPackages(finalPath);
-        var _ = _championConverter.CreateChampionPackages(finalPath);
         var tftSets = CreateTftSetsData(finalPath);
+        var _ = _championConverter.CreateChampionPackages(finalPath);
 
         return new()
         {
@@ -67,7 +67,7 @@ public sealed class LeagueConverter
 
             try
             {
-                CreateTftSetData(tftSetPath, finalPath);
+                CreateTftSetData(tftSetPath);
             }
             catch (Exception exception)
             {
@@ -80,7 +80,7 @@ public sealed class LeagueConverter
         return tftSets;
     }
 
-    private void CreateTftSetData(string tftSetPath, string finalPath)
+    private void CreateTftSetData(string tftSetPath)
     {
         using var wad = new WadFile(File.OpenRead(tftSetPath));
 
@@ -97,7 +97,7 @@ public sealed class LeagueConverter
                     wad,
                     chunkPaths
                 );
-                var _ = CharacterConverter.SaveCharacterPackage(characterData);
+                var _ = this._characterConverter.SaveCharacterPackage(characterData);
 
                 convertedCharacterNames.Add(characterName);
             }

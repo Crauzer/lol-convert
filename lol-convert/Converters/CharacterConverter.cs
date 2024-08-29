@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.HighPerformance;
+﻿using System.Text.Json;
+using CommunityToolkit.HighPerformance;
 using LeagueToolkit.Core.Animation;
 using LeagueToolkit.Core.Mesh;
 using LeagueToolkit.Core.Meta;
@@ -12,7 +13,6 @@ using lol_convert.Services;
 using lol_convert.Utils;
 using lol_convert.Wad;
 using Serilog;
-using System.Text.Json;
 using MetaClass = LeagueToolkit.Meta.Classes;
 using Skeleton = LeagueToolkit.Core.Animation.RigResource;
 
@@ -62,7 +62,7 @@ internal class CharacterConverter
         return new() { Name = characterName, SkinNames = skins.Select(x => x.Name).ToList() };
     }
 
-    private static void SaveCharacterSkinPackage(string characterName, CharacterSkin skin)
+    private void SaveCharacterSkinPackage(string characterName, CharacterSkin skin)
     {
         Log.Information(
             "Saving character skin package (characterName: {characterName}, skinName: {skinName})",
@@ -76,19 +76,19 @@ internal class CharacterConverter
         );
         var skinDataPath = PathBuilder.CreateCharacterSkinDataPath(characterName, skin.Name);
 
-        Directory.CreateDirectory(skinDirectory);
-        using var skinStream = File.Create(skinDataPath);
+        Directory.CreateDirectory(Path.Combine(this._outputPath, skinDirectory));
+        using var skinStream = File.Create(Path.Combine(this._outputPath, skinDataPath));
         JsonSerializer.Serialize(skinStream, skin, JsonUtils.DefaultOptions);
     }
 
-    public static string SaveCharacterPackage(Character character)
+    public string SaveCharacterPackage(Character character)
     {
         var characterName = character.Name.ToLower();
         var dataDirectoryPath = PathBuilder.CreateCharacterDataDirectoryPath(characterName);
         var dataPath = PathBuilder.CreateCharacterDataPath(characterName);
 
-        Directory.CreateDirectory(dataDirectoryPath);
-        using var championPackageStream = File.Create(dataPath);
+        Directory.CreateDirectory(Path.Combine(this._outputPath, dataDirectoryPath));
+        using var championPackageStream = File.Create(Path.Combine(this._outputPath, dataPath));
         JsonSerializer.Serialize(championPackageStream, character, JsonUtils.DefaultOptions);
 
         return dataPath;
@@ -148,7 +148,6 @@ internal class CharacterConverter
         WadFile wad
     )
     {
-        string skinPropertiesObjectPath = $"characters/{characterName}/skins/{skinName}";
         string meshAssetPath =
             $"assets/characters/{characterName}/skins/{skinName}/{characterName}_{skinName}.glb";
 
@@ -171,10 +170,7 @@ internal class CharacterConverter
                 ResourceResolver = resourceResolver
             };
 
-        var skinProperties = MetaSerializer.Deserialize<MetaClass.SkinCharacterDataProperties>(
-            MetaEnvironmentService.Environment,
-            bin.Objects[Fnv1a.HashLower(skinPropertiesObjectPath)]
-        );
+        var skinProperties = ResolveSkinProperties(binObjectContainer, characterName, skinName);
         if (
             skinProperties.SkinMeshProperties?.Value
             is not MetaClass.SkinMeshDataProperties skinMeshProperties
@@ -234,6 +230,38 @@ internal class CharacterConverter
             materialPackages.Add(new(staticMaterialDef));
         }
         return materialPackages;
+    }
+
+    private MetaClass.SkinCharacterDataProperties ResolveSkinProperties(
+        BinObjectContainer bin,
+        string characterName,
+        string skinName
+    )
+    {
+        string skinPropertiesObjectPath = $"characters/{characterName}/skins/{skinName}";
+
+        var skinPropertiesObject = bin.Objects[Fnv1a.HashLower(skinPropertiesObjectPath)];
+        return skinPropertiesObject.ClassHash switch
+        {
+            _
+                when skinPropertiesObject.ClassHash
+                    == Fnv1a.HashLower(nameof(MetaClass.SkinCharacterDataProperties))
+                => MetaSerializer.Deserialize<MetaClass.SkinCharacterDataProperties>(
+                    MetaEnvironmentService.Environment,
+                    skinPropertiesObject
+                ),
+            _
+                when skinPropertiesObject.ClassHash
+                    == Fnv1a.HashLower(nameof(MetaClass.TftSkinCharacterDataProperties))
+                => MetaSerializer.Deserialize<MetaClass.TftSkinCharacterDataProperties>(
+                    MetaEnvironmentService.Environment,
+                    skinPropertiesObject
+                ),
+            _
+                => throw new InvalidOperationException(
+                    $"Unknown skin properties object class: {skinPropertiesObject.ClassHash}"
+                )
+        };
     }
 
     public Dictionary<string, VfxSystem> CreateVfxSystems(IEnumerable<BinTreeObject> binObjects)
