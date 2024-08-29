@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace lol_convert;
 
@@ -20,6 +15,9 @@ public sealed partial class ConvertUtils
 
     [GeneratedRegex(@"^TFTSet[\d\w]+\.wad\.client")]
     private static partial Regex TftSetRegex();
+
+    [GeneratedRegex(@"^characters\/\w+")]
+    private static partial Regex TftCharacterRegex();
 
     public static IEnumerable<string> GlobChampionWads(string finalPath) =>
         Directory
@@ -46,4 +44,7 @@ public sealed partial class ConvertUtils
         Directory
             .EnumerateFiles(finalPath)
             .Where(path => TftSetRegex().IsMatch(Path.GetFileName(path)));
+
+    public static IEnumerable<string> GlobTftCharacters(IEnumerable<string> chunkPaths) =>
+        chunkPaths.Where(chunkPath => TftCharacterRegex().IsMatch(chunkPath));
 }
