@@ -18,7 +18,7 @@ using Skeleton = LeagueToolkit.Core.Animation.RigResource;
 
 namespace lol_convert.Converters;
 
-internal class CharacterConverter
+internal partial class CharacterConverter
 {
     private readonly WadHashtable _wadHashtable;
     private readonly MetaEnvironment _metaEnvironment;
@@ -381,41 +381,15 @@ internal class CharacterConverter
             skinCharacterProperties,
             binObjectContainer
         );
-        var animationPaths = CollectAtomicClipResourcePaths(animationGraphData);
-        var animations = LoadAnimations(animationPaths, wad);
+        if(animationGraphData is null)
+        {
+            Log.Warning("Failed to resolve animation graph data (character: {character}, skin: {skin})", character, skinName);
+        }
 
         Log.Verbose("Saving glTf -> {meshAssetPath}", meshAssetPath);
         simpleSkin
-            .ToGltf(rig, new List<(string, Stream)>(), animations)
+            .ToGltf(rig, [], [])
             .Save(absoluteMeshAssetPath);
-    }
-
-    private AnimationGraphPackage CreateAnimationGraph(
-        string characterName,
-        string skinName,
-        MetaClass.SkinCharacterDataProperties skinCharacterProperties,
-        BinObjectContainer binObjectContainer
-    )
-    {
-        if (
-            skinCharacterProperties.SkinAnimationProperties?.Value?.AnimationGraphData
-            is not MetaObjectLink animationGraphDataLink
-        )
-        {
-            Log.Warning(
-                "{characterName} - {skinName} does not have an animation graph data link",
-                characterName,
-                skinName
-            );
-            return new();
-        }
-
-        var animationGraph = MetaSerializer.Deserialize<MetaClass.AnimationGraphData>(
-            this._metaEnvironment,
-            binObjectContainer.Objects[animationGraphDataLink]
-        );
-
-        return new(animationGraph);
     }
 
     private static List<(string, IAnimationAsset)> LoadAnimations(
