@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using LeagueToolkit.Meta;
 using Serilog;
 
 namespace lol_convert.Services;
@@ -34,6 +35,8 @@ internal static class BinHashtableService
 
     public static string ResolveHash(uint hash) =>
         _hashes.GetValueOrDefault(hash, string.Format("{0:x8}", hash));
+
+    public static string ResolveHash(MetaHash hash) => ResolveHash(hash.Hash);
 
     public static string ResolveObjectLink(uint hash) =>
         _objectHashes.GetValueOrDefault(hash, string.Format("{0:x8}", hash));
