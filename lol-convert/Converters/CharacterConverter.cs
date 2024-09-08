@@ -198,11 +198,11 @@ internal partial class CharacterConverter
         return skin;
     }
 
-    private List<StaticMaterialPackage> CreateCharacterSkinMaterials(
+    private Dictionary<string, StaticMaterialPackage> CreateCharacterSkinMaterials(
         IEnumerable<BinTreeObject> binObjects
     )
     {
-        List<StaticMaterialPackage> materialPackages = [];
+        Dictionary<string, StaticMaterialPackage> materials = [];
 
         var staticMaterialObjects = binObjects.Where(binObject =>
             binObject.ClassHash == Fnv1a.HashLower(nameof(MetaClass.StaticMaterialDef))
@@ -225,11 +225,15 @@ internal partial class CharacterConverter
                     "Failed to deserialize static material object (object: {object})",
                     BinHashtableService.TryResolveObjectLink(staticMaterialObject.PathHash)
                 );
+                continue;
             }
 
-            materialPackages.Add(new(staticMaterialDef));
+            materials.Add(
+                BinHashtableService.ResolveObjectLink(staticMaterialObject.PathHash),
+                new(staticMaterialDef)
+            );
         }
-        return materialPackages;
+        return materials;
     }
 
     private MetaClass.SkinCharacterDataProperties ResolveSkinProperties(
@@ -381,15 +385,17 @@ internal partial class CharacterConverter
             skinCharacterProperties,
             binObjectContainer
         );
-        if(animationGraphData is null)
+        if (animationGraphData is null)
         {
-            Log.Warning("Failed to resolve animation graph data (character: {character}, skin: {skin})", character, skinName);
+            Log.Warning(
+                "Failed to resolve animation graph data (character: {character}, skin: {skin})",
+                character,
+                skinName
+            );
         }
 
         Log.Verbose("Saving glTf -> {meshAssetPath}", meshAssetPath);
-        simpleSkin
-            .ToGltf(rig, [], [])
-            .Save(absoluteMeshAssetPath);
+        simpleSkin.ToGltf(rig, [], []).Save(absoluteMeshAssetPath);
     }
 
     private static List<(string, IAnimationAsset)> LoadAnimations(

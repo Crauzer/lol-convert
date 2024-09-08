@@ -6,7 +6,7 @@ using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Converters;
 
-internal partial class ChampionConverter
+internal partial class CharacterConverter
 {
     private AnimationGraph CreateAnimationGraph(
         string character,

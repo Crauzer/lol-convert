@@ -25,7 +25,7 @@ internal sealed class CharacterSkin
     public string Material { get; set; }
     public string Texture { get; set; }
     public List<SkinMeshMaterialOverridePackage> MaterialOverrides { get; set; }
-    public List<StaticMaterialPackage> Materials { get; set; }
+    public Dictionary<string, StaticMaterialPackage> Materials { get; set; }
     public Dictionary<string, VfxSystem> VfxSystems { get; set; }
     public Dictionary<string, string> ResourceResolver { get; set; }
 }
