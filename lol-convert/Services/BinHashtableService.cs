@@ -42,6 +42,7 @@ internal static class BinHashtableService
         _objectHashes.GetValueOrDefault(hash, string.Format("{0:x8}", hash));
 
     public static string TryResolveHash(uint hash) => hash == 0 ? null : ResolveHash(hash);
+    public static string TryResolveHash(MetaHash hash) => TryResolveHash(hash.Hash);
 
     public static string TryResolveObjectLink(uint hash) =>
         hash == 0 ? null : ResolveObjectLink(hash);

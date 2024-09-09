@@ -22,7 +22,13 @@ public abstract class BaseClipData(MetaClass.ClipBaseData data)
         };
 }
 
-internal class AtomicClip : BaseClipData
+
+public abstract class BlendableClip(MetaClass.BlendableClipData data) : BaseClipData(data)
+{
+    
+}
+
+public class AtomicClip : BaseClipData
 {
     public string GltfName { get; set; }
 
