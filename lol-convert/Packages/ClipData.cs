@@ -22,10 +22,13 @@ public abstract class BaseClipData(MetaClass.ClipBaseData data)
         };
 }
 
-
 public abstract class BlendableClip(MetaClass.BlendableClipData data) : BaseClipData(data)
 {
-    
+    public Dictionary<uint, BaseEventData> Events { get; set; } =
+        data.EventDataMap?.ToDictionary(x => x.Key.Hash, x => BaseEventData.FromMeta(x.Value));
+    public uint MaskDataName { get; set; } = data.MaskDataName;
+    public uint SyncGroupDataName { get; set; } = data.SyncGroupDataName;
+    public uint TrackDataName { get; set; } = data.TrackDataName;
 }
 
 public class AtomicClip : BaseClipData
