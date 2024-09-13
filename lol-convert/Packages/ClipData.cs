@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using lol_convert.Services;
+using lol_convert.Utils;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Packages;
@@ -31,17 +32,15 @@ public abstract class BlendableClip(MetaClass.BlendableClipData data) : BaseClip
     public uint TrackDataName { get; set; } = data.TrackDataName;
 }
 
-public class AtomicClip : BaseClipData
+public class AtomicClip(MetaClass.AtomicClipData data) : BlendableClip(data)
 {
-    public string GltfName { get; set; }
-
-    public AtomicClip(MetaClass.AtomicClipData data)
-        : base(data)
-    {
-        this.GltfName = Path.GetFileNameWithoutExtension(
-            data.AnimationResourceData.Value.AnimationFilePath
-        );
-    }
+    public AnimationResourceData AnimationResource { get; set; } =
+        ObjectFactory.CreateInstanceOrNull<AnimationResourceData>(data.AnimationResourceData.Value);
+    public float StartFrame { get; set; } = data.StartFrame;
+    public float EndFrame { get; set; } = data.EndFrame;
+    public float TickDuration { get; set; } = data.TickDuration;
+    public UpdaterResourceData UpdaterResource { get; set; } =
+        ObjectFactory.CreateInstanceOrNull<UpdaterResourceData>(data.UpdaterResourceData);
 }
 
 [JsonDerivedType(typeof(KeyframeFloatmapClipAccessoryData), "keyframe_floatmap")]
@@ -63,3 +62,10 @@ public class KeyframeFloatmapClipAccessoryData(MetaClass.KeyFrameFloatMapClipAcc
 {
     public Dictionary<float, float> KeyframeFloatmap = data.KeyFrameFloatmap;
 }
+
+public class AnimationResourceData(MetaClass.AnimationResourceData data)
+{
+    public string AnimationFilePath { get; set; } = data.AnimationFilePath;
+}
+
+public class UpdaterResourceData(MetaClass.UpdaterResourceData data) { }
