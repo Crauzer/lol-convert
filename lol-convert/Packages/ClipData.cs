@@ -10,6 +10,7 @@ namespace lol_convert.Packages;
 [JsonDerivedType(typeof(ConditionBoolClip), "condition_bool")]
 [JsonDerivedType(typeof(ConditionFloatClip), "condition_float")]
 [JsonDerivedType(typeof(EventControlledSelectorClip), "event_controlled_selector")]
+[JsonDerivedType(typeof(ParallelClipData), "parallel")]
 public abstract class BaseClipData(MetaClass.ClipBaseData data)
 {
     public List<ClipAccessoryData> Accessories { get; set; } =
@@ -93,6 +94,11 @@ public class EventControlledSelectorClip(MetaClass.EventControlledSelectorClipDa
     public uint DefaultClipName { get; set; } = data.DefaultClipName;
     public List<EventControlledSelectorPairData> SelectorPairDataList { get; set; } =
         data.SelectorPairDataList?.Select(x => new EventControlledSelectorPairData(x)).ToList();
+}
+
+public class ParallelClipData(MetaClass.ParallelClipData data) : BaseClipData(data)
+{
+    public List<uint> ClipNames { get; set; } = data.ClipNameList?.Select(x => x.Hash).ToList();
 }
 
 [JsonDerivedType(typeof(KeyframeFloatmapClipAccessoryData), "keyframe_floatmap")]
