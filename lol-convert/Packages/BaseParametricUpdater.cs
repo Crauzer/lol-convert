@@ -16,3 +16,23 @@ public abstract class BaseParametricUpdater
             _ => null,
         };
 }
+
+public abstract class BooleanParametricUpdater : BaseParametricUpdater
+{
+    public static BooleanParametricUpdater FromMeta(MetaClass.IBooleanParametricUpdater data) =>
+        data switch
+        {
+            // TODO
+            _ => null,
+        };
+}
+
+public abstract class FloatParametricUpdater : BaseParametricUpdater
+{
+    public static FloatParametricUpdater FromMeta(MetaClass.IFloatParametricUpdater data) =>
+        data switch
+        {
+            // TODO
+            _ => null,
+        };
+}

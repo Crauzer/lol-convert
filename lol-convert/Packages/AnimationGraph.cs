@@ -9,51 +9,43 @@ internal class AnimationGraph
     public Dictionary<ulong, BaseBlendData> BlendData { get; set; }
     public bool UseCascadeBlend { get; set; }
     public float CascadeBlendValue { get; set; }
-    public Dictionary<string, BaseClipData> ClipData { get; set; }
-    public Dictionary<uint, MaskData> MaskData { get; set; }
-    public Dictionary<uint, SyncGroupData> SyncGroupData { get; set; }
-    public Dictionary<uint, TrackData> TrackData { get; set; }
+    public Dictionary<uint, BaseClipData> Clips { get; set; }
+    public Dictionary<uint, MaskData> Masks { get; set; }
+    public Dictionary<uint, SyncGroupData> SyncGroups { get; set; }
+    public Dictionary<uint, TrackData> Tracks { get; set; }
 
     public AnimationGraph() { }
 
     public AnimationGraph(MetaClass.AnimationGraphData animationGraph)
     {
-        this.AnimStateGraphEntryClips =
-            animationGraph.AnimStateGraphEntryClips?.Select(x => x.Hash).ToList() ?? null;
+        this.AnimStateGraphEntryClips = animationGraph
+            .AnimStateGraphEntryClips?.Select(x => x.Hash)
+            .ToList();
 
-        this.BlendData =
-            animationGraph
-                .BlendDataTable?.Select(x => new KeyValuePair<ulong, BaseBlendData>(
-                    x.Key,
-                    BaseBlendData.FromMeta(x.Value)
-                ))
-                .ToDictionary() ?? null;
+        this.BlendData = animationGraph.BlendDataTable?.ToDictionary(
+            x => x.Key,
+            x => BaseBlendData.FromMeta(x.Value)
+        );
 
         this.UseCascadeBlend = animationGraph.UseCascadeBlend;
         this.CascadeBlendValue = animationGraph.CascadeBlendValue;
 
-        foreach (var clipData in animationGraph.ClipDataMap)
-        {
-            var clip = clipData.Value switch
-            {
-                MetaClass.AtomicClipData atomicClip => new AtomicClip(atomicClip),
-                _ => null,
-            };
-
-            this.ClipData.Add(BinHashtableService.ResolveHash(clipData.Key), clip);
-        }
-
-        this.MaskData = animationGraph
-            .MaskDataMap.Select(x => KeyValuePair.Create(x.Key.Hash, new MaskData(x.Value)))
-            .ToDictionary();
-        this.SyncGroupData = animationGraph
-            .SyncGroupDataMap.Select(x =>
-                KeyValuePair.Create(x.Key.Hash, new SyncGroupData(x.Value))
-            )
-            .ToDictionary();
-        this.TrackData = animationGraph
-            .TrackDataMap.Select(x => KeyValuePair.Create(x.Key.Hash, new TrackData(x.Value)))
-            .ToDictionary();
+        this.Clips = animationGraph.ClipDataMap?.ToDictionary(
+            x => x.Key.Hash,
+            x => BaseClipData.FromMeta(x.Value)
+        );
+        this.Masks = animationGraph.MaskDataMap?.ToDictionary(
+            x => x.Key.Hash,
+            x => new MaskData(x.Value)
+        );
+        this.SyncGroups = animationGraph.SyncGroupDataMap?.ToDictionary(
+            x => x.Key.Hash,
+            x => new SyncGroupData(x.Value)
+        );
+        this.Tracks = animationGraph.TrackDataMap?.ToDictionary(
+            x => x.Key.Hash,
+            x => new TrackData(x.Value)
+        );
     }
 }
 

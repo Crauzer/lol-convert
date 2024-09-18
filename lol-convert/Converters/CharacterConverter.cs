@@ -379,22 +379,6 @@ internal partial class CharacterConverter
                 .AsStream()
         );
 
-        var animationGraphData = ResolveAnimationGraphData(
-            character,
-            skinName,
-            skinCharacterProperties,
-            binObjectContainer
-        );
-        if (animationGraphData is null)
-        {
-            Log.Warning(
-                "Failed to resolve animation graph data (character: {character}, skin: {skin})",
-                character,
-                skinName
-            );
-        }
-
-        Log.Verbose("Saving glTf -> {meshAssetPath}", meshAssetPath);
         simpleSkin.ToGltf(rig, [], []).Save(absoluteMeshAssetPath);
     }
 

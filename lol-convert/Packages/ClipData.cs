@@ -7,6 +7,9 @@ namespace lol_convert.Packages;
 
 [JsonDerivedType(typeof(AtomicClip), "atomic")]
 [JsonDerivedType(typeof(ParametricClip), "parametric")]
+[JsonDerivedType(typeof(ConditionBoolClip), "condition_bool")]
+[JsonDerivedType(typeof(ConditionFloatClip), "condition_float")]
+[JsonDerivedType(typeof(EventControlledSelectorClip), "event_controlled_selector")]
 public abstract class BaseClipData(MetaClass.ClipBaseData data)
 {
     public List<ClipAccessoryData> Accessories { get; set; } =
@@ -52,6 +55,46 @@ public class ParametricClip(MetaClass.ParametricClipData data) : BlendableClip(d
         BaseParametricUpdater.FromMeta(data.Updater);
 }
 
+public class ConditionBoolClip(MetaClass.ConditionBoolClipData data) : BaseClipData(data)
+{
+    public bool ChangeAnimationMidPlay { get; set; } = data.ChangeAnimationMidPlay;
+    public float ChildAnimDelaySwitchTime { get; set; } = data.ChildAnimDelaySwitchTime;
+    public bool DontStompTransitionClip { get; set; } = data.DontStompTransitionClip;
+    public uint FalseConditionClipName { get; set; } = data.FalseConditionClipName;
+    public bool PlayAnimChangeFromBeginning { get; set; } = data.PlayAnimChangeFromBeginning;
+    public bool SyncFrameOnChangeAnim { get; set; } = data.SyncFrameOnChangeAnim;
+    public uint TrueConditionClipName { get; set; } = data.TrueConditionClipName;
+    public BooleanParametricUpdater Updater { get; set; } =
+        BooleanParametricUpdater.FromMeta(data.Updater);
+}
+
+public class ConditionFloatClip(MetaClass.ConditionFloatClipData data) : BaseClipData(data)
+{
+    public FloatParametricUpdater Updater { get; set; } =
+        FloatParametricUpdater.FromMeta(data.Updater);
+    public List<ConditionFloatPairData> ConditionFloatPairs { get; set; } =
+        data.ConditionFloatPairDataList?.Select(x => new ConditionFloatPairData(x)).ToList();
+
+    public bool PlayAnimChangeFromBeginning { get; set; } = data.PlayAnimChangeFromBeginning;
+    public bool ChangeAnimationMidPlay { get; set; } = data.ChangeAnimationMidPlay;
+    public bool DontStompTransitionClip { get; set; } = data.DontStompTransitionClip;
+    public bool SyncFrameOnChangeAnim { get; set; } = data.SyncFrameOnChangeAnim;
+    public float ChildAnimDelaySwitchTime { get; set; } = data.ChildAnimDelaySwitchTime;
+}
+
+public class EventControlledSelectorClip(MetaClass.EventControlledSelectorClipData data)
+    : BaseClipData(data)
+{
+    public bool PlayAnimChangeFromBeginning { get; set; } = data.PlayAnimChangeFromBeginning;
+    public bool ChangeAnimationMidPlay { get; set; } = data.ChangeAnimationMidPlay;
+    public bool DontStompTransitionClip { get; set; } = data.DontStompTransitionClip;
+    public bool SyncFrameOnChangeAnim { get; set; } = data.SyncFrameOnChangeAnim;
+    public float ChildAnimDelaySwitchTime { get; set; } = data.ChildAnimDelaySwitchTime;
+    public uint DefaultClipName { get; set; } = data.DefaultClipName;
+    public List<EventControlledSelectorPairData> SelectorPairDataList { get; set; } =
+        data.SelectorPairDataList?.Select(x => new EventControlledSelectorPairData(x)).ToList();
+}
+
 [JsonDerivedType(typeof(KeyframeFloatmapClipAccessoryData), "keyframe_floatmap")]
 public abstract class ClipAccessoryData(MetaClass.ClipAccessoryData data)
 {
@@ -77,7 +120,7 @@ public class AnimationResourceData(MetaClass.AnimationResourceData data)
     public string AnimationFilePath { get; set; } = data.AnimationFilePath;
 }
 
-public class UpdaterResourceData(MetaClass.UpdaterResourceData data) 
+public class UpdaterResourceData(MetaClass.UpdaterResourceData data)
 {
     // TODO
 }
@@ -86,4 +129,18 @@ public class ParametricPairData(MetaClass.ParametricPairData data)
 {
     public uint ClipName { get; set; } = data.ClipName;
     public float Value { get; set; } = data.Value;
+}
+
+public class ConditionFloatPairData(MetaClass.ConditionFloatPairData data)
+{
+    public float Value { get; set; } = data.Value;
+    public float HoldAnimationToLower { get; set; } = data.HoldAnimationToLower;
+    public float HoldAnimationToHigher { get; set; } = data.HoldAnimationToHigher;
+    public uint ClipName { get; set; } = data.ClipName;
+}
+
+public class EventControlledSelectorPairData(MetaClass.EventControlledSelectorPairData data)
+{
+    public uint StateEventId { get; set; } = data.StateEventId;
+    public uint ClipName { get; set; } = data.ClipName;
 }
