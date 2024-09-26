@@ -70,7 +70,7 @@ internal partial class CharacterConverter
             skin.Name
         );
 
-        var skinDirectory = PathBuilder.CreateCharacterSkinDataDirectoryPath(
+        var skinDirectory = PathBuilder.GetCharacterSkinDataDirectory(
             characterName,
             skin.Name
         );
@@ -187,14 +187,55 @@ internal partial class CharacterConverter
         skin.Texture = skinMeshProperties.Texture;
         skin.MaterialOverrides = CollectMaterialOverrides(skinMeshProperties);
 
-        ProduceCharacterSkinMesh(
-            characterName,
-            skinName,
-            meshAssetPath,
-            skinProperties,
-            binObjectContainer,
-            wad
-        );
+        try
+        {
+            ProduceCharacterSkinMesh(
+                characterName,
+                skinName,
+                meshAssetPath,
+                skinProperties,
+                binObjectContainer,
+                wad
+            );
+        }
+        catch (Exception e)
+        {
+            Log.Error(
+                e,
+                "Failed to produce character skin mesh (character: {character}, skin: {skin})",
+                characterName,
+                skinName
+            );
+        }
+
+        try
+        {
+            var animationGraph = CreateAnimationGraph(
+                characterName,
+                skinName,
+                skinProperties,
+                binObjectContainer
+            );
+
+            if (animationGraph != null)
+            {
+                ProduceAnimationGraph(characterName, skinName, animationGraph);
+            }
+            else
+            {
+                throw new NullReferenceException("AnimationGraph is null");
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(
+                e,
+                "Failed to produce animation graph (character: {character}, skin: {skin})",
+                characterName,
+                skinName
+            );
+        }
+
         return skin;
     }
 
@@ -341,7 +382,7 @@ internal partial class CharacterConverter
         );
 
         return resourceResolver
-            .ResourceMap.Select(x => new KeyValuePair<string, string>(
+            .ResourceMap?.Select(x => new KeyValuePair<string, string>(
                 BinHashtableService.TryResolveHash(x.Key),
                 BinHashtableService.TryResolveObjectLink(x.Value)
             ))
@@ -411,27 +452,6 @@ internal partial class CharacterConverter
         }
 
         return animations;
-    }
-
-    private MetaClass.AnimationGraphData ResolveAnimationGraphData(
-        string characterName,
-        string skinName,
-        MetaClass.SkinCharacterDataProperties skinCharacterProperties,
-        BinObjectContainer binObjectContainer
-    )
-    {
-        if (
-            skinCharacterProperties.SkinAnimationProperties?.Value?.AnimationGraphData
-            is not MetaObjectLink animationGraphDataLink
-        )
-        {
-            return null;
-        }
-
-        return MetaSerializer.Deserialize<MetaClass.AnimationGraphData>(
-            this._metaEnvironment,
-            binObjectContainer.Objects[animationGraphDataLink]
-        );
     }
 
     private static List<string> CollectAtomicClipResourcePaths(

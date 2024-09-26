@@ -15,7 +15,7 @@ namespace lol_convert.Packages;
 public abstract class BaseClipData(MetaClass.ClipBaseData data)
 {
     public List<ClipAccessoryData> Accessories { get; set; } =
-        data.Accessorylist.Select(ClipAccessoryData.FromMeta)?.ToList() ?? null;
+        data.Accessorylist?.Select(ClipAccessoryData.FromMeta).ToList();
     public List<string> AnimationInterruptionGroupNames = data
         .AnimationInterruptionGroupNames?.Select(BinHashtableService.ResolveHash)
         .ToList();
