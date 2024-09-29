@@ -70,10 +70,7 @@ internal partial class CharacterConverter
             skin.Name
         );
 
-        var skinDirectory = PathBuilder.GetCharacterSkinDataDirectory(
-            characterName,
-            skin.Name
-        );
+        var skinDirectory = PathBuilder.GetCharacterSkinDataDirectory(characterName, skin.Name);
         var skinDataPath = PathBuilder.CreateCharacterSkinDataPath(characterName, skin.Name);
 
         Directory.CreateDirectory(Path.Combine(this._outputPath, skinDirectory));
@@ -187,12 +184,17 @@ internal partial class CharacterConverter
         skin.Texture = skinMeshProperties.Texture;
         skin.MaterialOverrides = CollectMaterialOverrides(skinMeshProperties);
 
+        var metaAnimationGraph = ResolveAnimationGraphData(skinProperties, binObjectContainer);
+        var animationPaths = metaAnimationGraph is null
+            ? []
+            : CollectAtomicClipResourcePaths(metaAnimationGraph);
+        var animations = LoadAnimations(animationPaths, wad);
+
         try
         {
             ProduceCharacterSkinMesh(
-                characterName,
-                skinName,
                 meshAssetPath,
+                animations,
                 skinProperties,
                 binObjectContainer,
                 wad
@@ -210,20 +212,17 @@ internal partial class CharacterConverter
 
         try
         {
-            var animationGraph = CreateAnimationGraph(
-                characterName,
-                skinName,
-                skinProperties,
-                binObjectContainer
-            );
-
-            if (animationGraph != null)
+            if (metaAnimationGraph is not null)
             {
-                ProduceAnimationGraph(characterName, skinName, animationGraph);
+                ProduceAnimationGraph(characterName, skinName, metaAnimationGraph, animations);
             }
             else
             {
-                throw new NullReferenceException("AnimationGraph is null");
+                Log.Warning(
+                    "No animation graph found (character: {character}, skin: {skin})",
+                    characterName,
+                    skinName
+                );
             }
         }
         catch (Exception e)
@@ -399,9 +398,8 @@ internal partial class CharacterConverter
             .ToList() ?? [];
 
     private void ProduceCharacterSkinMesh(
-        string character,
-        string skinName,
         string meshAssetPath,
+        List<(string, IAnimationAsset)> animations,
         MetaClass.SkinCharacterDataProperties skinCharacterProperties,
         BinObjectContainer binObjectContainer,
         WadFile wad
@@ -420,56 +418,6 @@ internal partial class CharacterConverter
                 .AsStream()
         );
 
-        simpleSkin.ToGltf(rig, [], []).Save(absoluteMeshAssetPath);
-    }
-
-    private static List<(string, IAnimationAsset)> LoadAnimations(
-        IEnumerable<string> animationPaths,
-        WadFile wad
-    )
-    {
-        List<(string, IAnimationAsset)> animations = [];
-        foreach (var animationPath in animationPaths)
-        {
-            IAnimationAsset animationAsset;
-            try
-            {
-                animationAsset = AnimationAsset.Load(
-                    wad.LoadChunkDecompressed(animationPath).AsStream()
-                );
-            }
-            catch (Exception e)
-            {
-                Log.Error(
-                    e,
-                    "Failed to load animation asset (animationPath: {animationPath})",
-                    animationPath
-                );
-                continue;
-            }
-
-            animations.Add((Path.GetFileNameWithoutExtension(animationPath), animationAsset));
-        }
-
-        return animations;
-    }
-
-    private static List<string> CollectAtomicClipResourcePaths(
-        MetaClass.AnimationGraphData animationGraph
-    )
-    {
-        List<string> paths = [];
-
-        foreach (var clip in animationGraph.ClipDataMap.Values)
-        {
-            if (clip is not MetaClass.AtomicClipData atomicClip)
-            {
-                continue;
-            }
-
-            paths.Add(atomicClip.AnimationResourceData.Value.AnimationFilePath);
-        }
-
-        return paths;
+        simpleSkin.ToGltf(rig, [], animations).Save(absoluteMeshAssetPath);
     }
 }

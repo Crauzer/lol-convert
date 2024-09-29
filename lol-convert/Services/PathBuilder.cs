@@ -24,7 +24,16 @@ internal static class PathBuilder
     public static string GetCharacterSkinAnimationAssetsDirectory(
         string characterName,
         string skinName
-    ) => Path.Combine("data", "characters", characterName, "skins", skinName, "animations");
+    ) => Path.Combine("assets", "characters", characterName, "skins", skinName, "animations");
+
+    public static string GetCharacterSkinAnimationAssetPath(
+        string characterName,
+        string skinName,
+        string animationName
+    ) => Path.Combine(
+        GetCharacterSkinAnimationAssetsDirectory(characterName, skinName),
+        $"{animationName}.anim_dump"
+    );
 
     public static string GetCharacterSkinAnimationGraphDataPath(
         string characterName,
