@@ -66,6 +66,8 @@ internal partial class CharacterConverter
 
         foreach (var (animationName, animationAsset) in animations)
         {
+            string animationNameLower = animationName.ToLower();
+
             try
             {
                 AnimationDump.DumpAnimationAsset(
@@ -74,7 +76,7 @@ internal partial class CharacterConverter
                         PathBuilder.GetCharacterSkinAnimationAssetPath(
                             character,
                             skin,
-                            animationName
+                            animationNameLower
                         )
                     ),
                     animationAsset
@@ -84,10 +86,10 @@ internal partial class CharacterConverter
             {
                 Log.Error(
                     e,
-                    "Failed to dump animation asset (character: {character}, skin: {skin}, animation: {animationName})",
+                    "Failed to dump animation asset (character: {character}, skin: {skin}, animation: {animationNameLower})",
                     character,
                     skin,
-                    animationName
+                    animationNameLower
                 );
             }
         }
