@@ -26,6 +26,8 @@ internal partial class CharacterConverter
 
         try
         {
+            AnimationGraph animationGraph = new(metaAnimationGraph);
+            TransformAnimationResourcePaths(character, skin, animationGraph);
             SaveAnimationGraph(character, skin, new(metaAnimationGraph));
         }
         catch (Exception e)
@@ -36,6 +38,32 @@ internal partial class CharacterConverter
                 character,
                 skin
             );
+        }
+    }
+
+    private static void TransformAnimationResourcePaths(
+        string character,
+        string skin,
+        AnimationGraph animationGraph
+    )
+    {
+        foreach (var clip in animationGraph.Clips)
+        {
+            if (
+                clip.Value is not AtomicClip atomicClip
+                || string.IsNullOrEmpty(atomicClip.AnimationResource?.AnimationFilePath)
+            )
+            {
+                continue;
+            }
+
+            atomicClip.AnimationResource.AnimationFilePath =
+                PathBuilder.GetCharacterSkinAnimationAssetPath(
+                    character,
+                    skin,
+                    Path.GetFileNameWithoutExtension(atomicClip.AnimationResource.AnimationFilePath)
+                        .ToLower()
+                );
         }
     }
 
