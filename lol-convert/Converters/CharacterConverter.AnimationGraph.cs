@@ -28,7 +28,7 @@ internal partial class CharacterConverter
         {
             AnimationGraph animationGraph = new(metaAnimationGraph);
             TransformAnimationResourcePaths(character, skin, animationGraph);
-            SaveAnimationGraph(character, skin, new(metaAnimationGraph));
+            SaveAnimationGraph(character, skin, animationGraph);
         }
         catch (Exception e)
         {
@@ -47,6 +47,11 @@ internal partial class CharacterConverter
         AnimationGraph animationGraph
     )
     {
+        if(animationGraph.Clips is null)
+        {
+            return;
+        }
+
         foreach (var clip in animationGraph.Clips)
         {
             if (

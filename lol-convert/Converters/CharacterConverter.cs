@@ -35,7 +35,7 @@ internal partial class CharacterConverter
         _outputPath = outputPath;
     }
 
-    public Character CreateCharacterPackage(
+    public Character CreateCharacterData(
         string characterName,
         WadFile wad,
         List<string> chunkPaths
@@ -78,7 +78,7 @@ internal partial class CharacterConverter
         JsonSerializer.Serialize(skinStream, skin, JsonUtils.DefaultOptions);
     }
 
-    public string SaveCharacterPackage(Character character)
+    public void SaveCharacterData(Character character)
     {
         var characterName = character.Name.ToLower();
         var dataDirectoryPath = PathBuilder.CreateCharacterDataDirectoryPath(characterName);
@@ -87,8 +87,6 @@ internal partial class CharacterConverter
         Directory.CreateDirectory(Path.Combine(this._outputPath, dataDirectoryPath));
         using var championPackageStream = File.Create(Path.Combine(this._outputPath, dataPath));
         JsonSerializer.Serialize(championPackageStream, character, JsonUtils.DefaultOptions);
-
-        return dataPath;
     }
 
     private List<CharacterSkin> CreateCharacterSkins(

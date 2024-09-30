@@ -44,10 +44,11 @@ public sealed class LeagueConverter
 
     public LeaguePackage CreateLeaguePackage(string finalPath)
     {
-        var championNames = GetChampionsList(finalPath).Order().ToList();
-        var maps = _mapConverter.CreateMapPackages(finalPath);
-        var tftSets = CreateTftSetsData(finalPath);
-        var _ = _championConverter.CreateChampionPackages(finalPath);
+        List<string> championNames = [.. GetChampionsList(finalPath).Order()];
+        List<string> maps = _mapConverter.CreateMapPackages(finalPath);
+        List<string> tftSets = CreateTftSetsData(finalPath);
+
+        _championConverter.ConvertChampions(finalPath);
 
         return new()
         {
@@ -92,12 +93,12 @@ public sealed class LeagueConverter
             string characterName = Path.GetFileName(characterPath);
             try
             {
-                var characterData = this._characterConverter.CreateCharacterPackage(
+                var characterData = this._characterConverter.CreateCharacterData(
                     characterName,
                     wad,
                     chunkPaths
                 );
-                var _ = this._characterConverter.SaveCharacterPackage(characterData);
+                this._characterConverter.SaveCharacterData(characterData);
 
                 convertedCharacterNames.Add(characterName);
             }
