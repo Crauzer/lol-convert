@@ -6,7 +6,6 @@ namespace lol_convert.Packages;
 
 internal class VfxSystem(MetaClass.VfxSystemDefinitionData vfxSystem)
 {
-    public string AssetCategory { get; set; } = vfxSystem.AssetCategory;
     public List<VfxAssetRemap> AssetRemappingTable { get; set; } =
         vfxSystem.AssetRemappingTable?.Select(x => new VfxAssetRemap(x)).ToList() ?? [];
     public int AudioParameterFlexId { get; set; } = vfxSystem.AudioParameterFlexId;
@@ -49,10 +48,10 @@ internal class VfxAssetRemap(MetaClass.VfxAssetRemap assetRemap)
     public string OldAsset { get; set; } = BinHashtableService.ResolveHash(assetRemap.OldAsset);
     public uint Type { get; set; } = assetRemap.Type;
 }
- 
+
 internal class VfxProbabilityTable(MetaClass.VfxProbabilityTableData table)
 {
-    public List<float> KeyTimes = [.. table.KeyTimes ?? []];
-    public List<float> KeyValues = [.. table.KeyValues ?? []];
+    public List<float> KeyTimes = table.KeyTimes?.ToList();
+    public List<float> KeyValues = table.KeyValues?.ToList();
     public float SingleValue = table.SingleValue;
 }

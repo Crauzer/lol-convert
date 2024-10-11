@@ -1,6 +1,6 @@
-﻿using lol_convert.Interfaces;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Text.Json.Serialization;
+using lol_convert.Interfaces;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
 namespace lol_convert.Packages;
@@ -31,10 +31,10 @@ internal class VfxVector3DynamicsBase { }
 
 internal class VfxVector3Dynamics(MetaClass.VfxAnimatedVector3f dynamics) : VfxVector3DynamicsBase
 {
-    public List<byte> Modes { get; set; } = dynamics.Modes is null ? null : [.. dynamics.Modes];
     public List<Vector3> Values { get; set; } =
         dynamics.Values is null ? null : [.. dynamics.Values];
     public List<float> Times { get; set; } = dynamics.Times is null ? null : [.. dynamics.Times];
+    public List<uint> m2090586069 { get; set; } = dynamics.m2090586069?.ToList();
 }
 
 internal class VfxVector3VariableDynamics(MetaClass.VfxAnimatedVector3fVariableData dynamics)

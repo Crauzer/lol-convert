@@ -25,10 +25,16 @@ internal class VfxColorDynamicsBase { }
 
 internal class VfxColorDynamics(MetaClass.VfxAnimatedColor dynamics) : VfxColorDynamicsBase
 {
-    public List<byte> Modes { get; set; } = dynamics.Modes is null ? null : [.. dynamics.Modes];
     public List<Vector4> Values { get; set; } =
         dynamics.Values is null ? null : [.. dynamics.Values];
     public List<float> Times { get; set; } = dynamics.Times is null ? null : [.. dynamics.Times];
+    public List<uint> m2090586069 { get; set; } = dynamics.m2090586069?.ToList();
+    public List<VfxProbabilityTable> ProbabilityTables { get; set; } =
+        dynamics
+            .ProbabilityTables?.Select(probabilityTable => new VfxProbabilityTable(
+                probabilityTable
+            ))
+            .ToList();
 }
 
 internal class VfxColorVariableDynamics(MetaClass.VfxAnimatedColorVariableData dynamics)
@@ -42,5 +48,5 @@ internal class VfxColorVariableDynamics(MetaClass.VfxAnimatedColorVariableData d
             .ProbabilityTables?.Select(probabilityTable => new VfxProbabilityTable(
                 probabilityTable
             ))
-            .ToList() ?? [];
+            .ToList();
 }
