@@ -20,6 +20,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore dependencies
         run: |
           cd src
@@ -33,7 +41,7 @@ jobs:
       - name: Publish
         run: |
           cd src
-          dotnet publish ${{ env.PROJECT_NAME }} -c Release -f net8.0 -r win-x64 --self-contained true
+          dotnet publish ${{ env.PROJECT_NAME }} -c Release -f net8.0 -r win-x64 --self-contained true --no-restore
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
