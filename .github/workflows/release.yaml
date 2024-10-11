@@ -36,12 +36,12 @@ jobs:
       - name: Build
         run: |
           cd src
-          dotnet build ${{ env.PROJECT_NAME }} -c Release -f net8.0 --no-restore
+          dotnet build -c Release -f net8.0 --no-restore
 
       - name: Publish
         run: |
           cd src
-          dotnet publish ${{ env.PROJECT_NAME }} -c Release -f net8.0 -r win-x64 --self-contained true --no-restore
+          dotnet publish -c Release -f net8.0 -r win-x64 --self-contained true --no-restore
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
