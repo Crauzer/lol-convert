@@ -22,11 +22,11 @@ jobs:
           git config user.email github-actions@github.com
           git push origin ${{ steps.create_tag.outputs.TAG_NAME }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Trigger Build and Release Workflow
         uses: peter-evans/repository-dispatch@v2
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           event-type: new-tag-created
           client-payload: '{"tag": "${{ steps.create_tag.outputs.tag_name }}"}'
