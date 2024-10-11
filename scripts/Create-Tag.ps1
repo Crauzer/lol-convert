@@ -10,8 +10,5 @@ $tagName = "${currentDate}-${latestCommit}"
 # Create the tag
 git tag $tagName
 
-# Push the tag to the remote repository
-git push origin $tagName
-
 # Output the tag name for use in GitHub Actions
 $tagName
