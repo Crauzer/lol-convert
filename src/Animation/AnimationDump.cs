@@ -16,7 +16,7 @@ public class AnimationDump
 
         int frameCount = (int)(asset.Fps * asset.Duration);
         bw.Write(frameCount);
-        
+
         Dictionary<uint, (Quaternion Rotation, Vector3 Translation, Vector3 Scale)> pose = [];
         float frameDuration = 1.0f / asset.Fps;
 
@@ -28,7 +28,7 @@ public class AnimationDump
             bw.Write(pose.Count); // joint count
             bw.Write(frameTime);
 
-            foreach(var (jointId, (rotation, translation, scale)) in pose)
+            foreach (var (jointId, (rotation, translation, scale)) in pose)
             {
                 bw.Write(jointId); // joint name hash
                 bw.Write(translation.X);
