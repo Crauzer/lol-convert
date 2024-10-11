@@ -1,0 +1,32 @@
+name: Create Tag
+
+on:
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: Setup Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Create and Push Tag
+        id: create_tag
+        shell: pwsh
+        run: |
+          $tagName = ./scripts/Create-Tag.ps1
+          echo "tag_name=$tagName" >> $env:GITHUB_OUTPUT
+
+      - name: Trigger Build and Release Workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event-type: new-tag-created
+          client-payload: '{"tag": "${{ steps.create_tag.outputs.tag_name }}"}'
