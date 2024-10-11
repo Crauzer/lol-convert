@@ -23,6 +23,7 @@ jobs:
       - name: Build with PowerShell
         shell: pwsh
         run: |
+          cd src
           dotnet publish ${{ env.PROJECT_NAME }} -c Release -f net8.0 -r win-x64 --self-contained true
 
       - name: Upload artifact
