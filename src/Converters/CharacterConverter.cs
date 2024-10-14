@@ -35,11 +35,7 @@ internal partial class CharacterConverter
         _outputPath = outputPath;
     }
 
-    public Character CreateCharacterData(
-        string characterName,
-        WadFile wad,
-        List<string> chunkPaths
-    )
+    public Character CreateCharacterData(string characterName, WadFile wad, List<string> chunkPaths)
     {
         var skins = CreateCharacterSkins(characterName, wad, chunkPaths);
         foreach (var skin in skins)
@@ -159,7 +155,6 @@ internal partial class CharacterConverter
             {
                 Name = skinName,
                 DisplayName = "TODO",
-                SkinMeshPath = meshAssetPath,
                 Materials = staticMaterials,
                 VfxSystems = vfxSystems,
                 ResourceResolver = resourceResolver
@@ -174,13 +169,7 @@ internal partial class CharacterConverter
             throw new NullReferenceException("SkinMeshProperties does not exist");
         }
 
-        skin.SkinScale = skinMeshProperties.SkinScale;
-        skin.Material =
-            skinMeshProperties.Material != 0
-                ? BinHashtableService.ResolveObjectLink(skinMeshProperties.Material)
-                : null;
-        skin.Texture = skinMeshProperties.Texture;
-        skin.MaterialOverrides = CollectMaterialOverrides(skinMeshProperties);
+        skin.SkinMeshProperties = new(skinMeshProperties) { SkinMeshPath = meshAssetPath };
 
         var metaAnimationGraph = ResolveAnimationGraphData(skinProperties, binObjectContainer);
         var animationPaths = metaAnimationGraph is null

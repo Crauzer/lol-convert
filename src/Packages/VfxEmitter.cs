@@ -332,7 +332,8 @@ internal class VfxPrimitiveBase
 }
 
 internal class VfxPrimitiveArbitraryQuad(MetaClass.VfxPrimitiveArbitraryQuad primitive)
-    : VfxPrimitiveBase(primitive) { }
+    : VfxPrimitiveBase(primitive)
+{ }
 
 internal class VfxPrimitiveBeam(MetaClass.VfxPrimitiveBeam primitive) : VfxPrimitiveBase(primitive)
 {
@@ -346,13 +347,16 @@ internal class VfxPrimitiveBeamBase(MetaClass.VfxPrimitiveBeamBase beam) : VfxPr
 }
 
 internal class VfxPrimitiveCameraSegmentBeam(MetaClass.VfxPrimitiveBeamBase beam)
-    : VfxPrimitiveBeamBase(beam) { }
+    : VfxPrimitiveBeamBase(beam)
+{ }
 
 internal class VfxPrimitiveCameraQuad(MetaClass.VfxPrimitiveCameraQuad primitive)
-    : VfxPrimitiveBase(primitive) { }
+    : VfxPrimitiveBase(primitive)
+{ }
 
 internal class VfxPrimitiveCameraUnitQuad(MetaClass.VfxPrimitiveCameraUnitQuad primitive)
-    : VfxPrimitiveBase(primitive) { }
+    : VfxPrimitiveBase(primitive)
+{ }
 
 internal class VfxPrimitiveProjectionBase(MetaClass.VfxPrimitiveProjectionBase projection)
     : VfxPrimitiveBase(projection)
@@ -362,7 +366,8 @@ internal class VfxPrimitiveProjectionBase(MetaClass.VfxPrimitiveProjectionBase p
 }
 
 internal class VfxPrimitivePlanarProjection(MetaClass.VfxPrimitivePlanarProjection planarProjection)
-    : VfxPrimitiveProjectionBase(planarProjection) { }
+    : VfxPrimitiveProjectionBase(planarProjection)
+{ }
 
 internal class VfxProjection(MetaClass.VfxProjectionDefinitionData projection)
 {
@@ -381,10 +386,12 @@ internal class VfxPrimitiveTrailBase(MetaClass.VfxPrimitiveTrailBase trail)
 }
 
 internal class VfxPrimitiveArbitraryTrail(MetaClass.VfxPrimitiveArbitraryTrail trail)
-    : VfxPrimitiveTrailBase(trail) { }
+    : VfxPrimitiveTrailBase(trail)
+{ }
 
 internal class VfxPrimitiveCameraTrail(MetaClass.VfxPrimitiveCameraTrail trail)
-    : VfxPrimitiveTrailBase(trail) { }
+    : VfxPrimitiveTrailBase(trail)
+{ }
 
 internal class VfxTrail(MetaClass.VfxTrailDefinitionData trail)
 {
