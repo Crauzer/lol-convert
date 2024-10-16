@@ -59,7 +59,8 @@ public class SkinMeshDataProperties(MetaClass.SkinMeshDataProperties skinMeshDat
         skinMeshDataProperties.MaterialController != null
             ? SkinnedMeshMaterialController.FromMeta(skinMeshDataProperties.MaterialController)
             : null;
-    public string InitialSubmeshToHide { get; set; } = skinMeshDataProperties.InitialSubmeshToHide;
+    public string[] InitialSubmeshToHide { get; set; } =
+        ConvertUtils.SplitSubmeshList(skinMeshDataProperties.InitialSubmeshToHide);
     public float Fresnel { get; set; } = skinMeshDataProperties.Fresnel;
     public float? BoundingSphereRadius { get; set; } = skinMeshDataProperties.BoundingSphereRadius;
     public string EmissiveTexture { get; set; } = skinMeshDataProperties.EmissiveTexture;
