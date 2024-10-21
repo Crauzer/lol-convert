@@ -41,11 +41,12 @@ public class SkinMeshDataProperties(MetaClass.SkinMeshDataProperties skinMeshDat
             .ToList();
     public float SelfIllumination { get; set; } = skinMeshDataProperties.SelfIllumination;
     public bool ForceDrawLast { get; set; } = skinMeshDataProperties.ForceDrawLast;
-    public string SubmeshRenderOrder { get; set; } = skinMeshDataProperties.SubmeshRenderOrder;
-    public string EmitterSubmeshAvatarToHide { get; set; } =
-        skinMeshDataProperties.EmitterSubmeshAvatarToHide;
-    public string InitialSubmeshMouseOversToHide { get; set; } =
-        skinMeshDataProperties.InitialSubmeshMouseOversToHide;
+    public string[] SubmeshRenderOrder { get; set; } =
+        ConvertUtils.SplitSubmeshList(skinMeshDataProperties.SubmeshRenderOrder);
+    public string[] EmitterSubmeshAvatarToHide { get; set; } =
+        ConvertUtils.SplitSubmeshList(skinMeshDataProperties.EmitterSubmeshAvatarToHide);
+    public string[] InitialSubmeshMouseOversToHide { get; set; } =
+        ConvertUtils.SplitSubmeshList(skinMeshDataProperties.InitialSubmeshMouseOversToHide);
     public Color FresnelColor { get; set; } = skinMeshDataProperties.FresnelColor;
     public string Texture { get; set; } = skinMeshDataProperties.Texture;
     public float BoundingCylinderRadius { get; set; } =
@@ -67,8 +68,8 @@ public class SkinMeshDataProperties(MetaClass.SkinMeshDataProperties skinMeshDat
     public float SkinScale { get; set; } = skinMeshDataProperties.SkinScale;
     public bool CastShadows { get; set; } = skinMeshDataProperties.CastShadows;
     public bool EnablePicking { get; set; } = skinMeshDataProperties.EnablePicking;
-    public string InitialSubmeshAvatarToHide { get; set; } =
-        skinMeshDataProperties.InitialSubmeshAvatarToHide;
+    public string[] InitialSubmeshAvatarToHide { get; set; } =
+        ConvertUtils.SplitSubmeshList(skinMeshDataProperties.InitialSubmeshAvatarToHide);
     public float BrushAlphaOverride { get; set; } = skinMeshDataProperties.BrushAlphaOverride;
     public string Material { get; set; } =
         BinHashtableService.TryResolveObjectLink(skinMeshDataProperties.Material);
@@ -78,8 +79,8 @@ public class SkinMeshDataProperties(MetaClass.SkinMeshDataProperties skinMeshDat
     public bool UsesSkinVo { get; set; } = skinMeshDataProperties.UsesSkinVo;
     public string NormalMapTexture { get; set; } = skinMeshDataProperties.NormalMapTexture;
     public string RigPoseModifierData { get; set; } = "TODO";
-    public string InitialSubmeshShadowsToHide { get; set; } =
-        skinMeshDataProperties.InitialSubmeshShadowsToHide;
+    public string[] InitialSubmeshShadowsToHide { get; set; } =
+        ConvertUtils.SplitSubmeshList(skinMeshDataProperties.InitialSubmeshShadowsToHide);
     public string SkinMeshPath { get; set; }
 }
 

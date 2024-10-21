@@ -55,7 +55,6 @@ public sealed partial class ConvertUtils
 
     public static string[] SplitSubmeshList(string submeshList) =>
         submeshList.Split(
-            submeshList,
             ' ',
             StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries
         );
