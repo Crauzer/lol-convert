@@ -308,6 +308,7 @@ internal class VfxPalette(MetaClass.VfxPaletteDefinitionData palette) { }
 [JsonDerivedType(typeof(VfxPrimitiveRay), "ray")]
 [JsonDerivedType(typeof(VfxPrimitiveArbitraryTrail), "arbitrary_trail")]
 [JsonDerivedType(typeof(VfxPrimitiveCameraTrail), "camera_trail")]
+[JsonDerivedType(typeof(VfxClass0x8df5fcf7), "0x8df5fcf7")]
 internal class VfxPrimitiveBase
 {
     public VfxPrimitiveBase(MetaClass.VfxPrimitiveBase primitive) { }
@@ -326,6 +327,7 @@ internal class VfxPrimitiveBase
             MetaClass.VfxPrimitiveRay x => new VfxPrimitiveRay(x),
             MetaClass.VfxPrimitiveArbitraryTrail x => new VfxPrimitiveArbitraryTrail(x),
             MetaClass.VfxPrimitiveCameraTrail x => new VfxPrimitiveCameraTrail(x),
+            MetaClass.Class0x8df5fcf7 x => new VfxClass0x8df5fcf7(x),
             null => null,
             _ => throw new NotImplementedException("Unknown primitive")
         };
@@ -430,3 +432,5 @@ internal class VfxMesh(MetaClass.VfxMeshDefinitionData mesh)
     public List<string> SubmeshesToDrawAlways { get; set; } =
         mesh.SubmeshesToDrawAlways?.Select(x => BinHashtableService.ResolveHash(x)).ToList();
 }
+
+internal class VfxClass0x8df5fcf7(MetaClass.Class0x8df5fcf7 primitive) : VfxPrimitiveBase(primitive) { }
