@@ -51,6 +51,7 @@ public abstract class BaseEventData(MetaClass.BaseEventData data)
             => new SubmeshVisibilityEventData(submeshVisibilityData),
         MetaClass.SyncedAnimationEventData syncedAnimationData
             => new SyncedAnimationEventData(syncedAnimationData),
+        null => null,
         _ => throw new ArgumentException("Unknown event data")
     };
 }
