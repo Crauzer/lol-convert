@@ -6,16 +6,16 @@ namespace lol_convert.Packages;
 internal class VfxTextureMult(MetaClass.VfxTextureMultDefinitionData textureMult)
 {
     public VfxVector2 BirthUvOffsetMult { get; set; } =
-        textureMult.BirthUvoffsetMult is null ? null : new(textureMult.BirthUvoffsetMult);
+        textureMult.BirthUVOffsetMult is null ? null : new(textureMult.BirthUVOffsetMult);
     public VfxFloat BirthUvRotateRateMult { get; set; } =
         textureMult.BirthUvRotateRateMult is null ? null : new(textureMult.BirthUvRotateRateMult);
     public VfxVector2 BirthUvScrollRateMult { get; set; } =
         textureMult.BirthUvScrollRateMult is null ? null : new(textureMult.BirthUvScrollRateMult);
     public Vector2 EmitterUvScrollRateMult { get; set; } = textureMult.EmitterUvScrollRateMult;
     public VfxFlexVector2 FlexBirthUvScrollRateMult { get; set; } =
-        textureMult.FlexBirthUvScrollRateMult is null
+        textureMult.FlexBirthUVScrollRateMult is null
             ? null
-            : new(textureMult.FlexBirthUvScrollRateMult);
+            : new(textureMult.FlexBirthUVScrollRateMult);
     public bool IsRandomStartFrameMult { get; set; } = textureMult.IsRandomStartFrameMult;
     public VfxFloat ParticleIntegratedUvRotateMult { get; set; } =
         textureMult.ParticleIntegratedUvRotateMult is null

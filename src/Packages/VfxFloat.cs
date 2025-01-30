@@ -5,14 +5,14 @@ namespace lol_convert.Packages;
 
 internal class VfxFlexFloat(MetaClass.FlexValueFloat flexValueFloat)
 {
-    public uint FlexId { get; set; } = flexValueFloat.FlexId;
+    public uint FlexId { get; set; } = flexValueFloat.FlexID;
     public VfxFloat Value { get; set; } =
         flexValueFloat.Value is null ? null : new(flexValueFloat.Value);
 }
 
 internal class VfxFlexTypeFloat(MetaClass.FlexTypeFloat flexTypeFloat)
 {
-    public uint FlexId { get; set; } = flexTypeFloat.FlexId;
+    public uint FlexId { get; set; } = flexTypeFloat.FlexID;
     public float Value { get; set; } = flexTypeFloat.Value;
 }
 

@@ -11,7 +11,7 @@ public abstract class SkinnedMeshMaterialController
     {
         return controller switch
         {
-            MetaClass.TftItemMaterialController tftItemController => new TftItemMaterialController(tftItemController),
+            MetaClass.TFTItemMaterialController tftItemController => new TftItemMaterialController(tftItemController),
             MetaClass.EsportsBannerMaterialController esportsBannerController => new EsportsBannerMaterialController(esportsBannerController),
             MetaClass.Class0xeaf8e31e eaf8e31eController => new Eaf8e31eMaterialController(eaf8e31eController),
             _ => throw new NotImplementedException("Unknown material controller type"),
@@ -19,7 +19,7 @@ public abstract class SkinnedMeshMaterialController
     }
 }
 
-public class TftItemMaterialController(MetaClass.TftItemMaterialController _controller) : SkinnedMeshMaterialController() { }
+public class TftItemMaterialController(MetaClass.TFTItemMaterialController _controller) : SkinnedMeshMaterialController() { }
 
 public class EsportsBannerMaterialController(MetaClass.EsportsBannerMaterialController _controller) : SkinnedMeshMaterialController() { }
 

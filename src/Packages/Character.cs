@@ -76,7 +76,7 @@ public class SkinMeshDataProperties(MetaClass.SkinMeshDataProperties skinMeshDat
     public bool ReducedBoneSkinning { get; set; } = skinMeshDataProperties.ReducedBoneSkinning;
     public string ReflectionMap { get; set; } = skinMeshDataProperties.ReflectionMap;
     public string GlossTexture { get; set; } = skinMeshDataProperties.GlossTexture;
-    public bool UsesSkinVo { get; set; } = skinMeshDataProperties.UsesSkinVo;
+    public bool UsesSkinVo { get; set; } = skinMeshDataProperties.UsesSkinVO;
     public string NormalMapTexture { get; set; } = skinMeshDataProperties.NormalMapTexture;
     public string RigPoseModifierData { get; set; } = "TODO";
     public string[] InitialSubmeshShadowsToHide { get; set; } =

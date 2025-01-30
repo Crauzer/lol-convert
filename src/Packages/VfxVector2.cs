@@ -7,7 +7,7 @@ namespace lol_convert.Packages;
 
 internal class VfxFlexVector2(MetaClass.FlexValueVector2 flexVector)
 {
-    public uint FlexId { get; set; } = flexVector.FlexId;
+    public uint FlexId { get; set; } = flexVector.FlexID;
     public VfxVector2 Value { get; set; } = flexVector.Value is null ? null : new(flexVector.Value);
 }
 

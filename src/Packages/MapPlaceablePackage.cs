@@ -53,12 +53,12 @@ internal class GdsMapObjectPackage(MetaClass.GdsMapObject gdsMapObject)
     public Vector3 BoxMax { get; set; } = gdsMapObject.BoxMax;
     public List<GdsMapObjectExtraInfoPackage> ExtraInfo { get; set; } =
         gdsMapObject
-            .ExtraInfo?.Select<MetaClass.GdsMapObjectExtraInfo, GdsMapObjectExtraInfoPackage>(x =>
+            .ExtraInfo?.Select<MetaClass.GDSMapObjectExtraInfo, GdsMapObjectExtraInfoPackage>(x =>
                 x switch
                 {
-                    MetaClass.GdsMapObjectAnimationInfo gdsMapObjectAnimationInfo
+                    MetaClass.GDSMapObjectAnimationInfo gdsMapObjectAnimationInfo
                         => new GdsMapObjectAnimationInfoPackage(gdsMapObjectAnimationInfo),
-                    MetaClass.GdsMapObjectBannerInfo bannerInfo
+                    MetaClass.GDSMapObjectBannerInfo bannerInfo
                         => new GdsMapObjectBannerInfoPackage(bannerInfo),
                     _ => null
                 }
@@ -68,7 +68,7 @@ internal class GdsMapObjectPackage(MetaClass.GdsMapObject gdsMapObject)
     public bool IgnoreCollisionOnPlacement { get; set; } = gdsMapObject.IgnoreCollisionOnPlacement;
     public string VisibilityController { get; set; } =
         BinHashtableService.TryResolveObjectLink(gdsMapObject.VisibilityController);
-    public uint MapObjectSkinId { get; set; } = gdsMapObject.MapObjectSkinId;
+    public uint MapObjectSkinId { get; set; } = gdsMapObject.MapObjectSkinID;
     public byte Type { get; set; } = gdsMapObject.Type;
 }
 
@@ -77,7 +77,7 @@ internal class GdsMapObjectPackage(MetaClass.GdsMapObject gdsMapObject)
 internal class GdsMapObjectExtraInfoPackage { }
 
 internal class GdsMapObjectAnimationInfoPackage(
-    MetaClass.GdsMapObjectAnimationInfo gdsMapObjectAnimationInfo
+    MetaClass.GDSMapObjectAnimationInfo gdsMapObjectAnimationInfo
 ) : GdsMapObjectExtraInfoPackage
 {
     public string DefaultAnimation { get; set; } = gdsMapObjectAnimationInfo.DefaultAnimation;
@@ -86,7 +86,7 @@ internal class GdsMapObjectAnimationInfoPackage(
     public bool Looping { get; set; } = gdsMapObjectAnimationInfo.Looping;
 }
 
-internal class GdsMapObjectBannerInfoPackage(MetaClass.GdsMapObjectBannerInfo bannerInfo)
+internal class GdsMapObjectBannerInfoPackage(MetaClass.GDSMapObjectBannerInfo bannerInfo)
     : GdsMapObjectExtraInfoPackage
 {
     public string BannerData { get; set; } =

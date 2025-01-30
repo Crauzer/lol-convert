@@ -57,7 +57,6 @@ public sealed class StaticMaterialShaderSamplerValue(StaticMaterialShaderSampler
     public uint AddressW { get; set; } = sampler.AddressW;
     public uint FilterMag { get; set; } = sampler.FilterMag;
     public uint FilterMin { get; set; } = sampler.FilterMin;
-    public uint FilterMip { get; set; } = sampler.FilterMip;
     public string SamplerName { get; set; } = sampler.SamplerName;
     public string TextureName { get; set; } = sampler.TextureName;
     public Dictionary<uint, string> UncensoredTextures { get; set; } =

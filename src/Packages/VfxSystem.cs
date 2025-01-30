@@ -8,7 +8,7 @@ internal class VfxSystem(MetaClass.VfxSystemDefinitionData vfxSystem)
 {
     public List<VfxAssetRemap> AssetRemappingTable { get; set; } =
         vfxSystem.AssetRemappingTable?.Select(x => new VfxAssetRemap(x)).ToList() ?? [];
-    public int AudioParameterFlexId { get; set; } = vfxSystem.AudioParameterFlexId;
+    public int AudioParameterFlexId { get; set; } = vfxSystem.AudioParameterFlexID;
     public float AudioParameterTimeScaledDuration { get; set; } =
         vfxSystem.AudioParameterTimeScaledDuration;
     public float BuildUpTime { get; set; } = vfxSystem.BuildUpTime;

@@ -42,7 +42,7 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public VfxVector3 BirthScale0 { get; set; } =
         emitter.BirthScale0 is null ? null : new(emitter.BirthScale0);
     public VfxVector2 BirthUvOffset { get; set; } =
-        emitter.BirthUvoffset is null ? null : new(emitter.BirthUvoffset);
+        emitter.BirthUVOffset is null ? null : new(emitter.BirthUVOffset);
     public VfxFloat BirthUvRotateRate { get; set; } =
         emitter.BirthUvRotateRate is null ? null : new(emitter.BirthUvRotateRate);
     public VfxVector2 BirthUvScrollRate { get; set; } =
@@ -92,7 +92,7 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
             ? null
             : new(emitter.FlexBirthRotationalVelocity0);
     public VfxFlexVector2 FlexBirthUvOffset { get; set; } =
-        emitter.FlexBirthUvoffset is null ? null : new(emitter.FlexBirthUvoffset);
+        emitter.FlexBirthUVOffset is null ? null : new(emitter.FlexBirthUVOffset);
     public VfxFlexVector3 FlexBirthVelocity { get; set; } =
         emitter.FlexBirthVelocity is null ? null : new(emitter.FlexBirthVelocity);
     public VfxFlexTypeFloat FlexInstanceScale { get; set; } =
@@ -146,9 +146,9 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
     public byte ParticleLingerType { get; set; } = emitter.ParticleLingerType;
     public bool ParticlesShareRandomValue { get; set; } = emitter.ParticlesShareRandomValue;
     public VfxFloat ParticleUvRotateRate { get; set; } =
-        emitter.ParticleUvRotateRate is null ? null : new(emitter.ParticleUvRotateRate);
+        emitter.ParticleUVRotateRate is null ? null : new(emitter.ParticleUVRotateRate);
     public VfxVector2 ParticleUvScrollRate { get; set; } =
-        emitter.ParticleUvScrollRate is null ? null : new(emitter.ParticleUvScrollRate);
+        emitter.ParticleUVScrollRate is null ? null : new(emitter.ParticleUVScrollRate);
     public short Pass { get; set; }
     public float? Period { get; set; }
     public Vector3 PostRotateOrientationAxis { get; set; } = emitter.PostRotateOrientationAxis;
