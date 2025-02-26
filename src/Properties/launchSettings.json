@@ -3,6 +3,10 @@
     "lol-convert": {
       "commandName": "Project",
       "commandLineArgs": "convert-league -f \"C:\\Riot Games\\League of Legends\\Game\\DATA\\FINAL\" --wad-hashtable \"X:\\lol\\tools\\ritobin\\hashes\\hashes.game.txt\" --bin-hashes \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binhashes.txt\" --bin-objects \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binentries.txt\" -o \"C:\\lol\\lol-convert-test\" "
+    },
+    "lol-convert-champion": {
+      "commandName": "Project",
+      "commandLineArgs": "convert-champion -f \"C:\\Riot Games\\League of Legends\\Game\\DATA\\FINAL\" --wad-hashtable \"X:\\lol\\tools\\ritobin\\hashes\\hashes.game.txt\" --bin-hashes \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binhashes.txt\" --bin-objects \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binentries.txt\" -o \"C:\\lol\\lol-convert-test\" -c \"Aatrox\""
     }
   }
 }

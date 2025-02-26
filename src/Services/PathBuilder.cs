@@ -10,16 +10,11 @@ internal static class PathBuilder
     public static string CreateCharacterDataPath(string characterName) =>
         Path.Combine(CreateCharacterDataDirectoryPath(characterName), $"{characterName}.json");
 
-    public static string GetCharacterSkinDataDirectory(
-        string characterName,
-        string skinName
-    ) => Path.Combine(CreateCharacterDataDirectoryPath(characterName), "skins", skinName);
+    public static string GetCharacterSkinDataDirectory(string characterName, string skinName) =>
+        Path.Combine(CreateCharacterDataDirectoryPath(characterName), "skins", skinName);
 
     public static string CreateCharacterSkinDataPath(string characterName, string skinName) =>
-        Path.Combine(
-            GetCharacterSkinDataDirectory(characterName, skinName),
-            $"{skinName}.json"
-        );
+        Path.Combine(GetCharacterSkinDataDirectory(characterName, skinName), $"{skinName}.json");
 
     public static string GetCharacterSkinAnimationAssetsDirectory(
         string characterName,
@@ -30,18 +25,20 @@ internal static class PathBuilder
         string characterName,
         string skinName,
         string animationName
-    ) => Path.Combine(
-        GetCharacterSkinAnimationAssetsDirectory(characterName, skinName),
-        $"{animationName}.anim_dump"
-    );
+    ) =>
+        Path.Combine(
+            GetCharacterSkinAnimationAssetsDirectory(characterName, skinName),
+            $"{animationName}.anim_dump"
+        );
 
     public static string GetCharacterSkinAnimationGraphDataPath(
         string characterName,
         string skinName
-    ) => Path.Combine(
-        GetCharacterSkinDataDirectory(characterName, skinName),
-        "animation_graph.json"
-    );
+    ) =>
+        Path.Combine(
+            GetCharacterSkinDataDirectory(characterName, skinName),
+            "animation_graph.json"
+        );
 
     // -------- Map --------
 

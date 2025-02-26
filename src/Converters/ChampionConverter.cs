@@ -25,7 +25,7 @@ internal class ChampionConverter
         _characterConverter = new(wadHashtable, metaEnvironment, outputPath);
     }
 
-    public void ConvertChampions(string finalPath)
+    public void ConvertChampionsFromLeague(string finalPath)
     {
         var championWadPaths = ConvertUtils.GlobChampionWads(finalPath).ToList();
         foreach (string championWadPath in championWadPaths)
@@ -43,5 +43,16 @@ internal class ChampionConverter
             );
             _characterConverter.SaveCharacterData(characterData);
         }
+    }
+
+    public void ConvertChampionFromLeague(string finalPath, string championName)
+    {
+        var wadPath = Path.Combine(finalPath, "Champions", $"{championName}.wad.client");
+
+        WadFile wad = new(File.OpenRead(wadPath));
+        var chunkPaths = ConvertUtils.ResolveWadChunkPaths(wad, _wadHashtable).ToList();
+
+        var characterData = _characterConverter.CreateCharacterData(championName, wad, chunkPaths);
+        _characterConverter.SaveCharacterData(characterData);
     }
 }

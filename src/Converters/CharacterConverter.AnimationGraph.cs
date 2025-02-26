@@ -47,7 +47,7 @@ internal partial class CharacterConverter
         AnimationGraph animationGraph
     )
     {
-        if(animationGraph.Clips is null)
+        if (animationGraph.Clips is null)
         {
             return;
         }

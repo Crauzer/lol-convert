@@ -2,3 +2,9 @@
 
 # IDE0009: Member access should be qualified.
 dotnet_style_qualification_for_method = false
+
+# IDE0003: Remove qualification
+dotnet_style_qualification_for_property = true
+
+# IDE0003: Remove qualification
+dotnet_style_qualification_for_field = true

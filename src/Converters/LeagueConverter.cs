@@ -48,7 +48,7 @@ public sealed class LeagueConverter
         List<string> maps = _mapConverter.CreateMapPackages(finalPath);
         List<string> tftSets = CreateTftSetsData(finalPath);
 
-        _championConverter.ConvertChampions(finalPath);
+        _championConverter.ConvertChampionsFromLeague(finalPath);
 
         return new()
         {
