@@ -7,6 +7,10 @@
     "lol-convert-champion": {
       "commandName": "Project",
       "commandLineArgs": "convert-champion -f \"C:\\Riot Games\\League of Legends\\Game\\DATA\\FINAL\" --wad-hashtable \"X:\\lol\\tools\\ritobin\\hashes\\hashes.game.txt\" --bin-hashes \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binhashes.txt\" --bin-objects \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binentries.txt\" -o \"C:\\lol\\lol-convert-test\" -c \"Aatrox\""
+    },
+    "lol-convert-map": {
+      "commandName": "Project",
+      "commandLineArgs": "convert-map -f \"C:\\Riot Games\\League of Legends\\Game\\DATA\\FINAL\" --wad-hashtable \"X:\\lol\\tools\\ritobin\\hashes\\hashes.game.txt\" --bin-hashes \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binhashes.txt\" --bin-objects \"X:\\lol\\tools\\ritobin\\hashes\\hashes.binentries.txt\" -o \"C:\\lol\\lol-convert-test\" -m \"Map11\""
     }
   }
 }

@@ -51,21 +51,37 @@ internal class MapConverter
             using var wad = new WadFile(mapWadPath);
 
             string mapName = FsUtils.FileNameWithoutMultiExtension(mapWadPath).ToLower();
-            var mapShippingBinTree = ResolveMapShippingBinTree(wad, mapName);
 
-            try
+            var mapPackage = CreateMapPackageFromLeague(mapName, finalPath);
+            if (mapPackage is not null)
             {
-                var mapPackage = CreateMapPackage(mapName, mapShippingBinTree, wad);
-                SaveMapPackage(mapPackage);
                 mapPackages.Add(mapPackage.Name);
-            }
-            catch (Exception exception)
-            {
-                Log.Error(exception, "Failed to create map package (mapName = {0})", mapName);
             }
         }
 
         return mapPackages;
+    }
+
+    public MapPackage CreateMapPackageFromLeague(string mapName, string finalPath)
+    {
+        Log.Information("Creating map package (mapName = {mapName})", mapName);
+
+        var mapWadPath = Path.Combine(finalPath, "maps", "shipping", $"{mapName}.wad.client");
+        using var wad = new WadFile(mapWadPath);
+
+        var mapShippingBinTree = ResolveMapShippingBinTree(wad, mapName);
+
+        try
+        {
+            var mapPackage = CreateMapPackage(mapName, mapShippingBinTree, wad);
+            SaveMapPackage(mapPackage);
+            return mapPackage;
+        }
+        catch (Exception exception)
+        {
+            Log.Error(exception, "Failed to create map package (mapName = {mapName})", mapName);
+            return null;
+        }
     }
 
     public MapPackage CreateMapPackage(string mapName, BinTree shippingBinTree, WadFile wad)

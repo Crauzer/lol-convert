@@ -21,10 +21,11 @@ internal class Program
             .CreateLogger();
 
         Parser
-            .Default.ParseArguments<ConvertLeagueOptions, ConvertChampionOptions>(args)
+            .Default.ParseArguments<ConvertLeagueOptions, ConvertChampionOptions, ConvertMapOptions>(args)
             .MapResult(
                 (ConvertLeagueOptions options) => RunConvertLeague(options),
                 (ConvertChampionOptions options) => RunConvertChampion(options),
+                (ConvertMapOptions options) => RunConvertMap(options),
                 errors => 1
             );
     }
@@ -92,6 +93,32 @@ internal class Program
             );
 
         converter.ConvertChampionFromLeague(options.FinalPath, options.ChampionName);
+
+        return 0;
+    }
+
+    static int RunConvertMap(ConvertMapOptions options)
+    {
+        BinHashtableService.LoadBinHashes(options.BinHashesPath);
+        BinHashtableService.LoadBinObjects(options.BinObjectHashesPath);
+
+        Log.Information(
+            "Clearing output directory (directory: {outputDirectory})",
+            options.OutputPath
+        );
+        FsUtils.ClearDirectory(options.OutputPath);
+
+        var metaEnvironment = MetaEnvironment.Create(
+            Assembly.Load("LeagueToolkit.Meta.Classes").ExportedTypes.Where(x => x.IsClass)
+        );
+
+        var mapConverter = new MapConverter(
+            WadHashtable.FromFile(options.WadHashtablePath),
+            metaEnvironment,
+            options.OutputPath
+        );
+
+        var _ = mapConverter.CreateMapPackageFromLeague(options.MapName, options.FinalPath);
 
         return 0;
     }
