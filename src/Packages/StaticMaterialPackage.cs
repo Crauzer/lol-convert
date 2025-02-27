@@ -57,8 +57,8 @@ public sealed class StaticMaterialShaderSamplerValue(StaticMaterialShaderSampler
     public uint AddressW { get; set; } = sampler.AddressW;
     public uint FilterMag { get; set; } = sampler.FilterMag;
     public uint FilterMin { get; set; } = sampler.FilterMin;
-    public string SamplerName { get; set; } = sampler.SamplerName;
     public string TextureName { get; set; } = sampler.TextureName;
+    public string TexturePath { get; set; } = sampler.TexturePath;
     public Dictionary<uint, string> UncensoredTextures { get; set; } =
         sampler.UncensoredTextures is not null
             ? new(sampler.UncensoredTextures.Select(x => KeyValuePair.Create(x.Key.Hash, x.Value)))
