@@ -170,7 +170,7 @@ internal class VfxEmitter(MetaClass.VfxEmitterDefinitionData emitter)
         emitter.SoftParticleParams is null ? null : new(emitter.SoftParticleParams);
     public bool SortEmittersByPos { get; set; } = emitter.SortEmittersByPos;
     public VfxShapeBase SpawnShape { get; set; } =
-        emitter.SpawnShape is null ? null : new(emitter.SpawnShape);
+        emitter.SpawnShape is null ? null : VfxShapeBase.FromMeta(emitter.SpawnShape);
     public ushort StartFrame { get; set; } = emitter.StartFrame;
     public byte StencilMode { get; set; } = emitter.StencilMode;
     public byte StencilRef { get; set; } = emitter.StencilRef;

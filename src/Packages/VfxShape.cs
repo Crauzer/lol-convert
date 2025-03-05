@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using LeagueToolkit.Meta.Classes;
+using System.Numerics;
 using System.Text.Json.Serialization;
 using MetaClass = LeagueToolkit.Meta.Classes;
 
@@ -9,14 +10,28 @@ namespace lol_convert.Packages;
 [JsonDerivedType(typeof(VfxShapeBox), "box")]
 [JsonDerivedType(typeof(VfxShapeCylinder), "cylinder")]
 [JsonDerivedType(typeof(VfxShapeSphere), "sphere")]
-internal class VfxShapeBase(MetaClass.IVfxShape shape) { }
+internal class VfxShapeBase 
+{
+    public static VfxShapeBase FromMeta(MetaClass.IVfxShape shape)
+    {
+        return shape switch
+        {
+            MetaClass.Class0xee39916f unk1 => new VfxShape0xee39916f(unk1),
+            MetaClass.VfxShapeLegacy legacy => new VfxShapeLegacy(legacy),
+            MetaClass.VfxShapeBox box => new VfxShapeBox(box),
+            MetaClass.VfxShapeCylinder cylinder => new VfxShapeCylinder(cylinder),
+            MetaClass.VfxShapeSphere sphere => new VfxShapeSphere(sphere),
+            _ => throw new NotImplementedException("Unknown vfx shape"),
+        };
+    }
+}
 
-internal class VfxShape0xee39916f(MetaClass.Class0xee39916f shape) : VfxShapeBase(shape)
+internal class VfxShape0xee39916f(MetaClass.Class0xee39916f shape) : VfxShapeBase
 {
     public Vector3 EmitOffset { get; set; } = shape.EmitOffset;
 }
 
-internal class VfxShapeLegacy(MetaClass.VfxShapeLegacy shape) : VfxShapeBase(shape)
+internal class VfxShapeLegacy(MetaClass.VfxShapeLegacy shape) : VfxShapeBase
 {
     public VfxVector3 EmitOffset { get; set; } =
         shape.EmitOffset is null ? null : new(shape.EmitOffset);
@@ -25,7 +40,7 @@ internal class VfxShapeLegacy(MetaClass.VfxShapeLegacy shape) : VfxShapeBase(sha
     public List<Vector3> EmitRotationAxes { get; set; } = shape.EmitRotationAxes?.ToList();
 }
 
-internal class VfxShapeVolume(MetaClass.VfxShapeVolume shape) : VfxShapeBase(shape)
+internal class VfxShapeVolume(MetaClass.VfxShapeVolume shape) : VfxShapeBase
 {
     public byte Flags { get; set; } = shape.Flags;
 }
