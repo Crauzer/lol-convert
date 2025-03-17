@@ -39,7 +39,12 @@ public sealed class LeagueConverter
 
         this._championConverter = new(hashtable, _metaEnvironment, outputPath);
         this._characterConverter = new(hashtable, _metaEnvironment, outputPath);
-        this._mapConverter = new(hashtable, _metaEnvironment, outputPath);
+        this._mapConverter = new(
+            hashtable,
+            _metaEnvironment,
+            outputPath,
+            new() { ConvertLinkedCharacters = options.ConvertLinkedMapCharacters }
+        );
     }
 
     public LeaguePackage CreateLeaguePackage(string finalPath)
@@ -155,4 +160,5 @@ public sealed class LeagueConverterOptions
 {
     public bool ConvertChampions { get; set; } = true;
     public bool ConvertChampionSkins { get; set; } = true;
+    public bool ConvertLinkedMapCharacters { get; init; } = true;
 }

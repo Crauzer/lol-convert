@@ -115,7 +115,11 @@ internal class Program
         var mapConverter = new MapConverter(
             WadHashtable.FromFile(options.WadHashtablePath),
             metaEnvironment,
-            options.OutputPath
+            options.OutputPath,
+            new()
+            {
+                ConvertLinkedCharacters = options.ConvertLinkedCharacters ?? true
+            }
         );
 
         var _ = mapConverter.CreateMapPackageFromLeague(options.MapName, options.FinalPath);

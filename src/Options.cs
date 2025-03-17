@@ -30,6 +30,9 @@ public class ConvertLeagueOptions
 
     [Option("convert-champion-skins", Default = true, HelpText = "Convert champion skins")]
     public bool? ConvertChampionSkins { get; set; }
+
+    [Option("linked-map-chars", Default = true, HelpText = "Whether to also convert linked map characters (map objects, structures, mobs...)")]
+    public bool? ConvertLinkedCharacters { get; set; }
 }
 
 [Verb("convert-champion", HelpText = "Convert a champion into a portable JSON format")]
@@ -77,4 +80,7 @@ public class ConvertMapOptions
 
     [Option("bin-objects", Required = true, HelpText = "Path to the bin object hashes file to use")]
     public string BinObjectHashesPath { get; set; }
+
+    [Option("linked-chars", Default = true, HelpText = "Whether to also convert linked map characters (map objects, structures, mobs...)")]
+    public bool? ConvertLinkedCharacters { get; set; }
 }

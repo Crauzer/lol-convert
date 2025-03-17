@@ -27,15 +27,23 @@ internal class MapConverter
     private readonly MetaEnvironment _metaEnvironment;
     private readonly string _outputPath;
 
+    public MapConverterSettings Settings { get; init; }
+    private readonly CharacterConverter _characterConverter;
+
     public MapConverter(
         WadHashtable wadHashtable,
         MetaEnvironment metaEnvironment,
-        string outputPath
+        string outputPath,
+        MapConverterSettings settings
     )
     {
         _wadHashtable = wadHashtable;
         _metaEnvironment = metaEnvironment;
         _outputPath = outputPath;
+
+        this.Settings = settings;
+
+        _characterConverter = new(wadHashtable, metaEnvironment, outputPath);
     }
 
     public List<string> CreateMapPackages(string finalPath)
@@ -96,6 +104,17 @@ internal class MapConverter
             .Value;
         var mapDefinition = MetaSerializer.Deserialize<Map>(_metaEnvironment, mapBinObject);
 
+        var chunkPaths = ConvertUtils.ResolveWadChunkPaths(wad, _wadHashtable).ToList();
+
+        var linkedCharacters = this.Settings.ConvertLinkedCharacters
+            ? CollectLinkedCharacterNames(shippingBinTree)
+            : [];
+        
+        if(this.Settings.ConvertLinkedCharacters)
+        {
+            ConvertLinkedCharacters(linkedCharacters, wad, chunkPaths);
+        }
+
         List<string> mapSkinNames = [];
         foreach (var mapSkinObjectLink in mapDefinition.MapSkins)
         {
@@ -131,7 +150,56 @@ internal class MapConverter
             }
         }
 
-        return new() { Name = mapName.ToLower(), Skins = mapSkinNames };
+        return new()
+        {
+            Name = mapName.ToLower(),
+            Skins = mapSkinNames,
+            LinkedCharacters = linkedCharacters
+        };
+    }
+
+    private static List<string> CollectLinkedCharacterNames(BinTree shipping)
+    {
+        return shipping
+            .Objects.Where(x => x.Value.ClassHash == Fnv1a.HashLower(nameof(MetaClass.Character)))
+            .Select(x =>
+                MetaSerializer.Deserialize<MetaClass.Character>(
+                    MetaEnvironmentService.Environment,
+                    x.Value
+                )
+            )
+            .Select(x => x.Name)
+            .ToList();
+    }
+
+    private void ConvertLinkedCharacters(
+        List<string> characters,
+        WadFile wad,
+        List<string> chunkPaths
+    )
+    {
+        Log.Information("Converting linked characters...");
+
+        foreach (var characterName in characters)
+        {
+            try
+            {
+                var characterData = _characterConverter.CreateCharacterData(
+                    characterName,
+                    wad,
+                    chunkPaths
+                );
+                _characterConverter.SaveCharacterData(characterData);
+            }
+            catch (Exception exception)
+            {
+                Log.Error(
+                    exception,
+                    "Failed to convert character ({characterName})",
+                    characterName
+                );
+            }
+        }
     }
 
     private MapSkinPackage CreateMapSkinPackage(
@@ -422,4 +490,9 @@ internal class MapConverter
         );
         JsonSerializer.Serialize(stream, mapSkin, JsonUtils.DefaultOptions);
     }
+}
+
+public struct MapConverterSettings
+{
+    public bool ConvertLinkedCharacters { get; set; }
 }
